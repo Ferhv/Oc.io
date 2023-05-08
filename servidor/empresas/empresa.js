@@ -3,7 +3,7 @@ app.post('/registrar-empresa', (req, res) => {
     const empresa = {
       nombre: req.body.nombre,
       email: req.body.email,
-      contrasena: req.body.contrasena,
+      password: req.body.password,
       cif: req.body.cif,
       domicilio_social: req.body.domicilio_social,
       telefono: req.body.telefono,
@@ -12,7 +12,7 @@ app.post('/registrar-empresa', (req, res) => {
     };
   
     //! Validar que se proporcionaron todos los campos obligatorios
-    if (!empresa.nombre || !empresa.email || !empresa.contrasena || !empresa.cif || !empresa.domicilio || !empresa.telefono || !empresa.domicilio_social || !empresa.euros) {
+    if (!empresa.nombre || !empresa.email || !empresa.password || !empresa.cif || !empresa.domicilio || !empresa.telefono || !empresa.domicilio_social || !empresa.euros) {
       return res.status(400).send('Por favor complete todos los campos obligatorios');
     }
   

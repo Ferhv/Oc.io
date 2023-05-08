@@ -1,9 +1,11 @@
 import { Model } from "objection";
 //import Movie from './Movie.model.js';
 //import ShowTiming from './ShowTiming.model.js';
-export default class Empresa extends Model {
+
+export default class Client extends Model {
+
   // Nombre de la tabla
-  static tableName = "cliente";
+  static tableName = "cliente";//TODO  ========================================   CLIENTE   ================================================
 
   // Clave primaria
   static idColumn = "email";

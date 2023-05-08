@@ -1,10 +1,9 @@
 import { Model } from "objection";
-//import Movie from './Movie.model.js';
-//import ShowTiming from './ShowTiming.model.js';
+//import Concierto from './concierto.model.js';
 export default class Empresa extends Model {
 
   // Nombre de la tabla
-  static tableName = "promotora"; //TODO PROMOTORA
+  static tableName = "promotora"; //TODO  ========================================   PROMOTORA   ===========================================
 
   // Clave primaria
   static idColumn = "email";
@@ -49,29 +48,5 @@ export default class Empresa extends Model {
     },
   };
 
-  // TODO ===============================================================================================================
-  /*static relationMappings = () => ({
-    // Relación CARTELERA --> Para cada cine, devuelve la propiedad "catalog" con la cartelera de ese cine
-    catalog: {
-      relation: Model.ManyToManyRelation,
-      modelClass: Movie,
-      join: {
-        from: "theater.id",
-        through: {
-          modelClass: ShowTiming,
-          from: "show_timing.theater_id",
-          to: "show_timing.movie_id",
-        },
-        to: "movie.id",
-      },
-    },
-    sessions: {
-      relation: Model.HasManyRelation,
-      modelClass: ShowTiming,
-      join: {
-        from: "theater.id",
-        to: "show_timing.theater_id",
-      },
-    },
-  });*/
+
 }

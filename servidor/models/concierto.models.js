@@ -1,9 +1,11 @@
 import { Model } from "objection";
 import Empresa from './empresa.model.js';
 //import ShowTiming from './ShowTiming.model.js';
-export default class Empresa extends Model {
+
+export default class Concierto extends Model {
+
   // Nombre de la tabla
-  static tableName = "concierto";
+  static tableName = "concierto";//TODO  ========================================   CONCIERTO   =============================================
 
   // Clave primaria
   static idColumn = "nombre_evento";

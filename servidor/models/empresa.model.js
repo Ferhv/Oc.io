@@ -23,7 +23,7 @@ export default class Empresa extends Model {
         type: "varchar",
         maxLength: 64,
       },
-      contrasena: {
+      password: {
         type: "varchar",
         maxLength: 64,
       },

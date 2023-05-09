@@ -1,12 +1,10 @@
 import {Model} from 'objection';
-import Timeslot from './Timeslot.model.js';
-import concierto  from './concierto.models.js';
-import Movie from './Movie.model.js';
+import Concierto  from './concierto.models.js';
 import Empresa from './empresa.model.js';
 
 export default class ShowTiming extends Model { //TODO  ========================================   SHOWTIMING  =============================
     
-    static tableName = 'show_timing';
+    static tableName = 'showtiming';
     
     // Clave primaria
     static idColumn = 'id';
@@ -33,32 +31,43 @@ export default class ShowTiming extends Model { //TODO  ========================
         }
     };
 
+
+    //relaccion pertenece a uno, entre modelo actual y el modelo "Empresa"
     static relationMappings = () => ({
-        promotoras: {
+        empresas: {
             relation: Model.BelongsToOneRelation,
             modelClass: Empresa,
+
+            //La relación se establece a través de los campos "showtiming.empresa_id" y "empresa.id" 
             join: {
-                from: 'show_timing.empresa_id',
+                from: 'showtiming.empresa_id',
                 to: 'empresa.id'
             }
         },
+        //Establece una relación de pertenencia entre los registros de la tabla actual y los registros de la tabla "Empresa", 
+        //lo que significa que cada registro en la tabla actual pertenece a un registro en la tabla "Empresa".
+
+
         concierto: {
             relation: Model.BelongsToOneRelation,
-            modelClass: concierto,
+            modelClass: Concierto,
             join: {
-                from: 'show_timing.concierto_id',
+                from: 'showtiming.concierto_id',
                 to: 'concierto.id'
             }
         },
-        // Relación TIMETABLE: Para cada show_timing, devuelve la hora de inicio y la hora de fin
-        timetable: {
+
+         // Relación TIMETABLE: Para cada showtiming, devuelve la hora de inicio y la hora de fin
+         timetable: {
             relation: Model.BelongsToOneRelation,
             modelClass: Timeslot,
             filter: query => query.select('start_time', 'end_time'),
             join: {
-                from: 'show_timing.timing_id',
+                from: 'showtiming.timing_id',
                 to: 'timeslot.id'
             }
         }
+
+
     });
 }

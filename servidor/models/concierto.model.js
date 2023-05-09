@@ -49,7 +49,7 @@ export default class Concierto extends Model {
   static relationMappings = () => ({
     projections: {
         relation: Model.ManyToManyRelation,
-        modelClass: Promotora,
+        modelClass: Empresa,
         join: {
             from: 'concierto.id',
             through: {
@@ -69,5 +69,5 @@ export default class Concierto extends Model {
         },
 
     }
-})
+  })
 }

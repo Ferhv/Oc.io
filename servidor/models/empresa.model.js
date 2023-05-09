@@ -1,5 +1,5 @@
 import { Model } from "objection";
-//import Concierto from './concierto.model.js';
+import Concierto from "./concierto.models";
 export default class Empresa extends Model {
 
   // Nombre de la tabla
@@ -48,5 +48,29 @@ export default class Empresa extends Model {
     },
   };
 
-
+  // Relaciones
+  static relationMappings = () => ({        
+    // Relación CARTELERA --> Para cada empresa, devuelve la propiedad "catalog" con la cartelera de esa empresa
+    catalog: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Concierto,
+        join: {
+            from: 'empresa.id',
+            through: {
+                modelClass: ShowTiming,
+                from: 'show_timing.empresa_id',
+                to: 'show_timing.concierto_id',
+            },
+            to: 'concierto.id',
+        },
+    },
+    sessions: {
+        relation: Model.HasManyRelation,
+        modelClass: ShowTiming,
+        join: {
+            from: 'empresa.id',
+            to: 'show_timing.empresa_id',
+        }
+    }
+  });
 }

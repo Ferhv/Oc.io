@@ -71,3 +71,12 @@ export default class ShowTiming extends Model { //TODO  ========================
 
     });
 }
+
+/**CREATE TABLE SHOWTIMING (
+	id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+	day DATE not null, 
+	empresa_id INTEGER not null, 
+	concierto_id INTEGER not null, 
+	timing_id INTEGER not null
+); */
+

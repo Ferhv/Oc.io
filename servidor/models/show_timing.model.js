@@ -4,7 +4,7 @@ import Empresa from './empresa.model.js';
 
 export default class ShowTiming extends Model { //TODO  ========================================   SHOWTIMING  =============================
     
-    static tableName = 'showtiming';
+    static tableName = 'show_timing';
     
     // Clave primaria
     static idColumn = 'id';
@@ -57,7 +57,9 @@ export default class ShowTiming extends Model { //TODO  ========================
             }
         },
 
+        
          // Relación TIMETABLE: Para cada showtiming, devuelve la hora de inicio y la hora de fin
+         /*
          timetable: {
             relation: Model.BelongsToOneRelation,
             modelClass: Timeslot,
@@ -66,17 +68,11 @@ export default class ShowTiming extends Model { //TODO  ========================
                 from: 'showtiming.timing_id',
                 to: 'timeslot.id'
             }
-        }
+        }*/
 
 
     });
 }
 
-/**CREATE TABLE SHOWTIMING (
-	id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-	day DATE not null, 
-	empresa_id INTEGER not null, 
-	concierto_id INTEGER not null, 
-	timing_id INTEGER not null
-); */
+
 

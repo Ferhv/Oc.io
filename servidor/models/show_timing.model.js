@@ -4,9 +4,14 @@ import concierto  from './concierto.models.js';
 import Movie from './Movie.model.js';
 import Empresa from './empresa.model.js';
 
-export default class ShowTiming extends Model {
+export default class ShowTiming extends Model { //TODO  ========================================   SHOWTIMING  =============================
+    
     static tableName = 'show_timing';
+    
+    // Clave primaria
     static idColumn = 'id';
+    
+    // Esquema de datos
     static jsonSchema = {
         type: 'object',
         properties: {

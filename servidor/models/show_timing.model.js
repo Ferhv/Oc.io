@@ -37,7 +37,7 @@ export default class ShowTiming extends Model {
                 to: 'empresa.id'
             }
         },
-        movies: {
+        concierto: {
             relation: Model.BelongsToOneRelation,
             modelClass: concierto,
             join: {

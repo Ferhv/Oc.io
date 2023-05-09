@@ -45,5 +45,29 @@ export default class Concierto extends Model {
     },
   };
 
+  // Relaciones
+  static relationMappings = () => ({
+    projections: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Promotora,
+        join: {
+            from: 'concierto.id',
+            through: {
+                modelClass: ShowTiming,
+                from: 'show_timing.concierto_id',
+                to: 'show_timing.empresa_id'
+            },
+            to: 'empresa.id'
+        }
+    },
+    sessions: {
+        relation: Model.HasManyRelation,
+        modelClass: ShowTiming,
+        join: {
+            from: 'concierto.id',
+            to: 'show_timing.concierto_id'
+        },
 
+    }
+})
 }

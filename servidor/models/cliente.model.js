@@ -2,7 +2,7 @@ import { Model } from "objection";
 //import Movie from './Movie.model.js';
 //import ShowTiming from './ShowTiming.model.js';
 
-export default class Client extends Model {
+export default class Cliente extends Model {
 
   // Nombre de la tabla
   static tableName = "cliente";//TODO  ========================================   CLIENTE   ================================================

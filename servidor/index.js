@@ -21,6 +21,7 @@ Empresa.knex(dbConnection);
 Concierto.knex(dbConnection); 
 ShowTiming.knex(dbConnection);
 Cliente.knex(dbConnection);
+Administrador.knex(dbConnection);
 
 
 // TODO Endpoint: POST /concierto --> Devuelve todas los conciertos ====================================================================

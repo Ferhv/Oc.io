@@ -98,7 +98,7 @@ const pool = new Pool({
 // Configurar el middleware para procesar JSON
 app.use(express.json());
 
-// TODO Ruta para registrar una empresa ==================================
+// TODO Ruta para registrar una empresa =====================================================================================
 
 app.post('/empresas', async (req, res) => {
   const { nombre, email, password, cif, domicilio_social, telefono, responsable, euros } = req.body;
@@ -152,7 +152,7 @@ function isValidPhoneNumber(telefono) {
 }
 
 
-// TODO Ruta para eliminar una cuenta de empresa =================================================================
+// TODO Ruta para eliminar una cuenta de empresa =============================================================================
 app.delete('/empresa/:id', async (req, res) => {
   const usuarioId = req.params.id;
 
@@ -164,12 +164,47 @@ app.delete('/empresa/:id', async (req, res) => {
     await pool.query(query, values);
 
     res.status(200).json({ mensaje: 'Cuenta de empresa eliminada exitosamente' });
-    
+
   } catch (error) {
     console.error('Error al eliminar la cuenta de empresa:', error);
     res.status(500).json({ mensaje: 'Error al eliminar la cuenta de empresa' });
   }
 });
+
+// TODO Ruta para obtener la información de los conciertos de la empresa ===========================================================
+app.get('/empresa/conciertos', async (req, res) => {
+  try {
+    // Obtener la información de los conciertos creados por la empresa desde la base de datos
+    const conciertos = await Concierto.query().where('empresa_id', req.user.id);
+
+    res.status(200).json(conciertos);
+  } catch (error) {
+    console.error('Error al obtener la información de los conciertos:', error);
+    res.status(500).json({ mensaje: 'Error al obtener la información de los conciertos' });
+  }
+});
+
+//! Ruta para crear un nuevo concierto ================================================================= DUDA
+app.post('/empresa/conciertos', async (req, res) => {
+  try {
+    // Obtener los datos del nuevo concierto desde el cuerpo de la solicitud (req.body)
+    const { nombre, fecha, lugar } = req.body;
+
+    // Crear el nuevo concierto en la base de datos
+    const nuevoConcierto = await Concierto.query().insert({
+      nombre,
+      fecha,
+      lugar,
+      empresa_id: req.user.id, // Asignar el ID de la empresa creadora del concierto
+    });
+
+    res.status(200).json({ mensaje: 'Concierto creado exitosamente', concierto: nuevoConcierto });
+  } catch (error) {
+    console.error('Error al crear el concierto:', error);
+    res.status(500).json({ mensaje: 'Error al crear el concierto' });
+  }
+});
+
 
 // Iniciar el servidor en el puerto 3000
 app.listen(3000, () => {

@@ -34,7 +34,7 @@ export default class Administrador extends Model {
 
 }
 
-const express = require('express');
+import express from 'express';
 const app = express();
 app.use(cors());
 

@@ -28,40 +28,7 @@ app.use(express.json());
     }
   });
   
-  // TODO Ruta para comprar entradas  ===========================================================================================================
-  app.post('/concierto/:id/comprar', async (req, res) => {
-    const eventoId = req.params.id;
-    const { cantidad, tarjeta } = req.body;
-  
-    try {
-      // Validar la disponibilidad de la entrada
-      const evento = await Concierto.query().findById(eventoId);
-  
-      if (!evento) {
-        return res.status(404).json({ mensaje: 'El evento no existe' });
-      }
-  
-      if (evento.fecha < new Date()) {
-        return res.status(400).json({ mensaje: 'El evento ya ha pasado' });
-      }
-  
-      if (cantidad > evento.aforo) {
-        return res.status(400).json({ mensaje: 'No hay suficientes entradas disponibles' });
-      }
-  
-      //  Realizar el proceso de compra de la entrada
-      const total = evento.precio * cantidad;
-  
-      //! Conectarse al servicio de pasarela de pago y validar la transacción
-      //! Guardar la informacion
-    
-      res.status(200).json({ mensaje: 'Compra de entrada realizada exitosamente' });
-    } catch (error) {
-      console.error('Error al comprar la entrada:', error);
-      res.status(500).json({ mensaje: 'Error al comprar la entrada' });
-    }
-  });
-  
+
   
 
 

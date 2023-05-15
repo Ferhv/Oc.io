@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import { development } from './knexfile.js';
 
-// Instanciamos Express y el middleware de JSON y CORS
+// Instanciamos Express y el middleware de JSON y CORS -
 const app = express();
 app.use(express.json());
 app.use(cors());

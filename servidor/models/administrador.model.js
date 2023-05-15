@@ -35,3 +35,136 @@ export default class Administrador extends Model {
   };
 
 }
+
+const express = require('express');
+const app = express();
+const { Pool } = require('pg');
+
+// Configuración de la conexión a la base de datos
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'oc.io_2023',
+  password: 'root',
+  port: 5432
+});
+
+// Configurar el middleware para procesar JSON
+app.use(express.json());
+
+// * =======================================================================  EMPRESA ====================================================
+
+// TODO Ruta para que el administrador obtenga un listado de empresas pendientes de autorización =============================
+app.get('/empresas/pendientes', async (req, res) => {
+  try {
+    // Obtener las empresas pendientes de autorización desde la base de datos
+    const query = 'SELECT * FROM empresas WHERE verificado = false';
+    const result = await pool.query(query);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener las empresas pendientes de autorización:', error);
+    res.status(500).json({ mensaje: 'Error al obtener las empresas pendientes de autorización' });
+  }
+});
+
+// TODO Ruta para que el administrador autorice una empresa promotora =========================================
+app.put('/empresas/:id/autorizar', async (req, res) => {
+  const empresaId = req.params.id;
+
+  try {
+    // Autorizar la empresa actualizando el campo "verificado" a true en la base de datos
+    const query = 'UPDATE empresas SET verificado = true WHERE id = $1';
+    const values = [empresaId];
+
+    await pool.query(query, values);
+
+    res.status(200).json({ mensaje: 'Empresa autorizada exitosamente' });
+  } catch (error) {
+    console.error('Error al autorizar la empresa:', error);
+    res.status(500).json({ mensaje: 'Error al autorizar la empresa' });
+  }
+});
+
+// TODO  Ruta para que el administrador elimine una cuenta de promotora ====================================================
+app.delete('/empresas/:id', async (req, res) => {
+  const promotoraId = req.params.id;
+
+  try {
+    // Eliminar la cuenta de promotora de la base de datos
+    const query = 'DELETE FROM promotoras WHERE id = $1';
+    const values = [promotoraId];
+
+    await pool.query(query, values);
+
+    res.status(200).json({ mensaje: 'Cuenta de promotora eliminada exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar la cuenta de promotora:', error);
+    res.status(500).json({ mensaje: 'Error al eliminar la cuenta de promotora' });
+  }
+});
+
+
+
+
+// * =======================================================================  CLIENTE ====================================================
+
+// TODO Ruta para que el administrador obtenga un listado de empresas pendientes de autorización =============================
+app.get('/cliente/pendientes', async (req, res) => {
+  try {
+    // Obtener las cliente pendientes de autorización desde la base de datos
+    const query = 'SELECT * FROM cliente WHERE verificado = false';
+    const result = await pool.query(query);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener las cliente pendientes de autorización:', error);
+    res.status(500).json({ mensaje: 'Error al obtener las cliente pendientes de autorización' });
+  }
+});
+
+// TODO Ruta para que el administrador autorice una cuenta de CLIENTE ==================================================
+app.put('/cliente/:id/autorizar', async (req, res) => {
+  const promotoraId = req.params.id;
+
+  try {
+    // Autorizar la cuenta de promotora actualizando el campo "autorizado" a true en la base de datos
+    const query = 'UPDATE cliente SET autorizado = true WHERE id = $1';
+    const values = [promotoraId];
+
+    await pool.query(query, values);
+
+    res.status(200).json({ mensaje: 'Cuenta de cliente autorizada exitosamente' });
+  } catch (error) {
+    console.error('Error al autorizar la cuenta de cliente:', error);
+    res.status(500).json({ mensaje: 'Error al autorizar la cuenta de cliente' });
+  }
+});
+
+//TODO Ruta para que el administrador elimine una cuenta de cliente =======================================================
+app.delete('/cliente/:id', async (req, res) => {
+  const promotoraId = req.params.id;
+
+  try {
+    // Eliminar la cuenta de promotora de la base de datos
+    const query = 'DELETE FROM cliente WHERE id = $1';
+    const values = [promotoraId];
+
+    await pool.query(query, values);
+
+    res.status(200).json({ mensaje: 'Cuenta de cliente eliminada exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar la cuenta de cliente:', error);
+    res.status(500).json({ mensaje: 'Error al eliminar la cuenta de cliente' });
+  }
+});
+
+
+
+
+// Iniciar el servidor en el puerto 3000
+app.listen(3000, () => {
+  console.log('Servidor escuchando en el puerto 3000');
+});
+
+

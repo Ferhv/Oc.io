@@ -1,11 +1,12 @@
 import { Model } from "objection";
-//import Movie from './Movie.model.js';
-//import ShowTiming from './ShowTiming.model.js';
-
 import express from 'express';
-//Instanciamos Express
-const app = express();
-const { Pool } = require('pg');
+
+// Conexiones a la base de datos
+const dbConnection = Knex(development);
+Cliente.knex(dbConnection);
+
+// Configurar el middleware para procesar JSON
+app.use(express.json());
 
 export default class Client extends Model {
 
@@ -50,16 +51,6 @@ export default class Client extends Model {
 }
 
 
-
-// Configuración de la conexión a la base de datos
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'oc.io_2023',
-  password: 'root',
-  port: 5432
-});
-
 // Configurar el middleware para procesar JSON
 app.use(express.json());
 
@@ -73,23 +64,23 @@ app.post('/clientes', async (req, res) => {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
-  //^ Validar el formato del email
-  if (!isValidEmail(email)) {
+  //^Validar el formato del email
+  if (!esValidoEmail(email)) {
     return res.status(400).json({ mensaje: 'Formato de email inválido' });
   }
 
-  //^ Validar el formato del DNI
-  if (!isValidDNI(dni)) {
+  // Validar el formato del DNI
+  if (!esValidoDNI(dni)) {
     return res.status(400).json({ mensaje: 'Formato de DNI inválido' });
   }
 
-  //^ Validar el formato de la fecha de nacimiento
-  if (!isValidDate(fecha)) {
+  // Validar el formato de la fecha de nacimiento
+  if (!esValidoDate(fecha)) {
     return res.status(400).json({ mensaje: 'Formato de fecha inválido' });
   }
 
-  //^ Validar el formato del número de teléfono
-  if (!isValidPhoneNumber(telefono)) {
+  // Validar el formato del número de teléfono
+  if (!esValidoTelefono(telefono)) {
     return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
   }
 
@@ -108,25 +99,25 @@ app.post('/clientes', async (req, res) => {
 });
 
 //^ Función para validar el formato del email
-function isValidEmail(email) {
+function esValidoEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
 //^ Función para validar el formato del DNI
-function isValidDNI(dni) {
+function esValidoDNI(dni) {
   const dniRegex = /^\d{8}[A-HJ-NP-TV-Z]$/;
   return dniRegex.test(dni);
 }
 
 //^ Función para validar el formato de la fecha
-function isValidDate(date) {
+function esValidoDate(date) {
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   return dateRegex.test(date);
 }
 
 //^ Función para validar el formato del número de teléfono
-function isValidPhoneNumber(telefono) {
+function esValidoTelefono(telefono) {
   const phoneRegex = /^\d{9}$/; // Formato de 9 dígitos
   return phoneRegex.test(telefono);
 }
@@ -134,14 +125,12 @@ function isValidPhoneNumber(telefono) {
 
 // TODO Ruta para eliminar una cuenta de cliente =================================================================
 app.delete('/cliente/:id', async (req, res) => {
-  const usuarioId = req.params.id;
+  const clienteId = req.params.id;
 
   try {
-    // Eliminar la cuenta de usuario de la base de datos
-    const query = 'DELETE FROM cliente WHERE id = $1';
-    const values = [usuarioId];
-
-    await pool.query(query, values);
+    // Eliminar la cuenta de cliente de la base de datos
+    const query = 'DELETE FROM cliente WHERE id = ?';
+    const result = await dbConnection.raw(query, [clienteId]);
 
     res.status(200).json({ mensaje: 'Cuenta de cliente eliminada exitosamente' });
   } catch (error) {
@@ -149,6 +138,7 @@ app.delete('/cliente/:id', async (req, res) => {
     res.status(500).json({ mensaje: 'Error al eliminar la cuenta de cliente' });
   }
 });
+
 
 
 // Iniciar el servidor en el puerto 3000

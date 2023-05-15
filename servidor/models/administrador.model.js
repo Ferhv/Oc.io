@@ -1,6 +1,4 @@
 
-//import Movie from './Movie.model.js';
-//import ShowTiming from './ShowTiming.model.js';
 import {Model} from 'objection'
 import bcrypt from 'bcryptjs'
 
@@ -38,28 +36,24 @@ export default class Administrador extends Model {
 
 const express = require('express');
 const app = express();
-const { Pool } = require('pg');
+app.use(cors());
 
-// Configuración de la conexión a la base de datos
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'oc.io_2023',
-  password: 'root',
-  port: 5432
-});
+// Conexiones a la base de datos
+const dbConnection = Knex(development);
+Administrador.knex(dbConnection);
 
 // Configurar el middleware para procesar JSON
 app.use(express.json());
 
-// * =======================================================================  EMPRESA ====================================================
+
+// * =======================================================================  EMPRESA =========================================================
 
 // TODO Ruta para que el administrador obtenga un listado de empresas pendientes de autorización =============================
 app.get('/empresas/pendientes', async (req, res) => {
   try {
     // Obtener las empresas pendientes de autorización desde la base de datos
     const query = 'SELECT * FROM empresas WHERE verificado = false';
-    const result = await pool.query(query);
+    const result = await dbConnection.raw(query);
 
     res.status(200).json(result.rows);
   } catch (error) {
@@ -68,16 +62,15 @@ app.get('/empresas/pendientes', async (req, res) => {
   }
 });
 
+
 // TODO Ruta para que el administrador autorice una empresa promotora =========================================
 app.put('/empresas/:id/autorizar', async (req, res) => {
   const empresaId = req.params.id;
 
   try {
     // Autorizar la empresa actualizando el campo "verificado" a true en la base de datos
-    const query = 'UPDATE empresas SET verificado = true WHERE id = $1';
-    const values = [empresaId];
-
-    await pool.query(query, values);
+    const query = 'UPDATE empresas SET verificado = true WHERE id = ?';
+    const result = await dbConnection.raw(query, [empresaId]);
 
     res.status(200).json({ mensaje: 'Empresa autorizada exitosamente' });
   } catch (error) {
@@ -86,71 +79,36 @@ app.put('/empresas/:id/autorizar', async (req, res) => {
   }
 });
 
+
 // TODO  Ruta para que el administrador elimine una cuenta de promotora ====================================================
 app.delete('/empresas/:id', async (req, res) => {
-  const promotoraId = req.params.id;
+  const empresaId = req.params.id;
 
   try {
-    // Eliminar la cuenta de promotora de la base de datos
-    const query = 'DELETE FROM promotoras WHERE id = $1';
-    const values = [promotoraId];
+    // Eliminar la cuenta de empresa de la base de datos
+    const query = 'DELETE FROM empresas WHERE id = ?';
+    const result = await dbConnection.raw(query, [empresaId]);
 
-    await pool.query(query, values);
-
-    res.status(200).json({ mensaje: 'Cuenta de promotora eliminada exitosamente' });
+    res.status(200).json({ mensaje: 'Cuenta de empresa eliminada exitosamente' });
   } catch (error) {
-    console.error('Error al eliminar la cuenta de promotora:', error);
-    res.status(500).json({ mensaje: 'Error al eliminar la cuenta de promotora' });
+    console.error('Error al eliminar la cuenta de empresa:', error);
+    res.status(500).json({ mensaje: 'Error al eliminar la cuenta de empresa' });
   }
 });
 
 
 
 
-// * =======================================================================  CLIENTE ====================================================
-
-// TODO Ruta para que el administrador obtenga un listado de empresas pendientes de autorización =============================
-app.get('/cliente/pendientes', async (req, res) => {
-  try {
-    // Obtener las cliente pendientes de autorización desde la base de datos
-    const query = 'SELECT * FROM cliente WHERE verificado = false';
-    const result = await pool.query(query);
-
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error('Error al obtener las cliente pendientes de autorización:', error);
-    res.status(500).json({ mensaje: 'Error al obtener las cliente pendientes de autorización' });
-  }
-});
-
-// TODO Ruta para que el administrador autorice una cuenta de CLIENTE ==================================================
-app.put('/cliente/:id/autorizar', async (req, res) => {
-  const promotoraId = req.params.id;
-
-  try {
-    // Autorizar la cuenta de promotora actualizando el campo "autorizado" a true en la base de datos
-    const query = 'UPDATE cliente SET autorizado = true WHERE id = $1';
-    const values = [promotoraId];
-
-    await pool.query(query, values);
-
-    res.status(200).json({ mensaje: 'Cuenta de cliente autorizada exitosamente' });
-  } catch (error) {
-    console.error('Error al autorizar la cuenta de cliente:', error);
-    res.status(500).json({ mensaje: 'Error al autorizar la cuenta de cliente' });
-  }
-});
+// * =======================================================================  CLIENTE ==========================================================
 
 //TODO Ruta para que el administrador elimine una cuenta de cliente =======================================================
 app.delete('/cliente/:id', async (req, res) => {
-  const promotoraId = req.params.id;
+  const empresaId = req.params.id;
 
   try {
-    // Eliminar la cuenta de promotora de la base de datos
-    const query = 'DELETE FROM cliente WHERE id = $1';
-    const values = [promotoraId];
-
-    await pool.query(query, values);
+    // Eliminar la cuenta de cliente de la base de datos
+    const query = 'DELETE FROM cliente WHERE id = ?';
+    const result = await dbConnection.raw(query, [empresaId]);
 
     res.status(200).json({ mensaje: 'Cuenta de cliente eliminada exitosamente' });
   } catch (error) {
@@ -158,7 +116,6 @@ app.delete('/cliente/:id', async (req, res) => {
     res.status(500).json({ mensaje: 'Error al eliminar la cuenta de cliente' });
   }
 });
-
 
 
 

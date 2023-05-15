@@ -108,14 +108,19 @@ app.post('/empresas', async (req, res) => {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
-  //^ Validar el formato del email
-  if (!isValidEmail(email)) {
+  // Validar el formato del email
+  if (!esValidoEmail(email)) {
     return res.status(400).json({ mensaje: 'Formato de email inválido' });
   }
 
-  //^ Validar el formato del CIF
-  if (!isValidCIF(cif)) {
+  // Validar el formato del CIF
+  if (!esValidoCIF(cif)) {
     return res.status(400).json({ mensaje: 'Formato de CIF inválido' });
+  }
+
+  // Validar el formato del telefono
+  if (!esValidoTelefono(telefono)) {
+    return res.status(400).json({ mensaje: 'Formato del Telefono inválido' });
   }
   
   try {
@@ -134,25 +139,26 @@ app.post('/empresas', async (req, res) => {
 
 
 //^ Función para validar el formato del email
-function isValidEmail(email) {
+function esValidoEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
 //^ Función para validar el formato del CIF
-function isValidCIF(cif) {
+function esValidoCIF(cif) {
   const cifRegex = /^[A-HJNP-SUW]{1}\d{7}[0-9A-J]$/;
   return cifRegex.test(cif);
 }
 
 //^ Función para validar el formato del número de teléfono
-function isValidPhoneNumber(telefono) {
+function esValidoTelefono(telefono) {
   const phoneRegex = /^\d{9}$/; // Formato de 9 dígitos
   return phoneRegex.test(telefono);
 }
 
 
-// TODO Ruta para eliminar una cuenta de empresa =============================================================================
+// TODO Ruta para eliminar una cuenta de empresa ==============================================================================================
+
 app.delete('/empresa/:id', async (req, res) => {
   const usuarioId = req.params.id;
 
@@ -171,7 +177,7 @@ app.delete('/empresa/:id', async (req, res) => {
   }
 });
 
-// TODO Ruta para obtener la información de los conciertos de la empresa ===========================================================
+// TODO Ruta para obtener la información de los conciertos de la empresa =====================================================================
 app.get('/empresa/conciertos', async (req, res) => {
   try {
     // Obtener la información de los conciertos creados por la empresa desde la base de datos

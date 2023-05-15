@@ -2,7 +2,8 @@ import { Model } from "objection";
 import Empresa from './empresa.model.js';
 //import ShowTiming from './ShowTiming.model.js';
 
-const express = require('express');
+import express from 'express';
+//Instanciamos Express
 const app = express();
 const { Pool } = require('pg');
 

@@ -3,7 +3,11 @@ import Concierto from "./concierto.models";
 
 const express = require('express');
 const app = express();
-const { Pool } = require('pg');
+app.use(cors());
+
+// Conexiones a la base de datos
+const dbConnection = Knex(development);
+Empresa.knex(dbConnection);
 
 // Configurar el middleware para procesar JSON
 app.use(express.json());
@@ -12,7 +16,7 @@ app.use(express.json());
 export default class Empresa extends Model {
 
   // Nombre de la tabla
-  static tableName = "promotora"; //TODO  ========================================   PROMOTORA   ===========================================
+  static tableName = "empresa"; //TODO  ========================================   PROMOTORA   ===========================================
 
   // Clave primaria
   static idColumn = "email";
@@ -53,6 +57,9 @@ export default class Empresa extends Model {
       },
       euros: {
         type: "integer",
+      },
+      verificado: {
+        type: "boolean"
       }
     },
   };
@@ -86,17 +93,10 @@ export default class Empresa extends Model {
 
 }
 
-// Configuración de la conexión a la base de datos
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'oc.io_2023',
-  password: 'root',
-  port: 5432
-});
-
 // Configurar el middleware para procesar JSON
 app.use(express.json());
+
+
 
 // TODO Ruta para registrar una empresa =====================================================================================
 
@@ -119,12 +119,12 @@ app.post('/empresas', async (req, res) => {
   }
   
   try {
-    //^ Guardar los datos de la empresa en la base de datos
-    const query = 'INSERT INTO empresas (nombre, email, password, cif, domicilio, telefono, responsable, capital) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)';
-    const values = [nombre, email, password, cif, domicilio_social, telefono, responsable, euros, false]; // Establecer el campo "verificado" como false
+     //^ Guardar los datos de la empresa en la base de datos
+    const query = 'INSERT INTO empresas (nombre, email, password, cif, domicilio, telefono, responsable, capital, verificado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const values = [nombre, email, password, cif, domicilio_social, telefono, responsable, euros, false]; 
     
-    await pool.query(query, values);
-
+    await dbConnection.raw(query, values);
+  
     res.status(200).json({ mensaje: 'Registro exitoso. Su cuenta está pendiente de verificación.' });
   } catch (error) {
     console.error('Error al guardar los datos de la empresa:', error);
@@ -157,14 +157,14 @@ app.delete('/empresa/:id', async (req, res) => {
   const usuarioId = req.params.id;
 
   try {
-    // Eliminar la cuenta de empresa de la base de datos
-    const query = 'DELETE FROM empresa WHERE id = $1';
+    // Eliminar la cuenta de la base de datos
+    const query = 'DELETE FROM empresa WHERE id = ?';
     const values = [usuarioId];
-
-    await pool.query(query, values);
-
+  
+    await dbConnection.raw(query, values);
+  
     res.status(200).json({ mensaje: 'Cuenta de empresa eliminada exitosamente' });
-
+  
   } catch (error) {
     console.error('Error al eliminar la cuenta de empresa:', error);
     res.status(500).json({ mensaje: 'Error al eliminar la cuenta de empresa' });
@@ -183,6 +183,11 @@ app.get('/empresa/conciertos', async (req, res) => {
     res.status(500).json({ mensaje: 'Error al obtener la información de los conciertos' });
   }
 });
+
+
+
+
+
 
 //! Ruta para crear un nuevo concierto ================================================================= DUDA
 app.post('/empresa/conciertos', async (req, res) => {

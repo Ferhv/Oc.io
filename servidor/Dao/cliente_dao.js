@@ -12,4 +12,4 @@ async function getClienteById(id){
     return await Cliente.query().select().findById(id);
 }
 
-async function insert
+//async function insert

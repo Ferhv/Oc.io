@@ -9,4 +9,4 @@
 
 // Registrarse
 
-// Crear usuarios
+// Validar usuario

@@ -3,9 +3,9 @@
 
 
 
+// Registrarse
 
-
-
+// Borrar empresa
 
 // Crear conciertos
 

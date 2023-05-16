@@ -8,7 +8,7 @@ Cliente.knex(dbConnection);
 // Configurar el middleware para procesar JSON
 app.use(express.json());
 
-export default class Client extends Model {
+export default class Cliente extends Model {
 
   // Nombre de la tabla
   static tableName = "cliente";//TODO  ========================================   CLIENTE   ================================================

@@ -2,11 +2,6 @@ import { Model } from "objection";
 import Empresa from './empresa.model.js';
 //import ShowTiming from './ShowTiming.model.js';
 
-import express from 'express';
-//Instanciamos Express
-const app = express();
-const { Pool } = require('pg');
-
 export default class Concierto extends Model {
 
   // Nombre de la tabla
@@ -78,6 +73,7 @@ export default class Concierto extends Model {
 }
 
 
+/** 
 
 // Configuración de la conexión a la base de datos
 const pool = new Pool({
@@ -118,3 +114,5 @@ app.post('/eventos', async (req, res) => {
 app.listen(3000, () => {
   console.log('Servidor escuchando en el puerto 3000');
 });
+
+**/

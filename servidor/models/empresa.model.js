@@ -1,16 +1,5 @@
 import { Model } from "objection";
-import Concierto from "./concierto.models";
-
-const express = require('express');
-const app = express();
-app.use(cors());
-
-// Conexiones a la base de datos
-const dbConnection = Knex(development);
-Empresa.knex(dbConnection);
-
-// Configurar el middleware para procesar JSON
-app.use(express.json());
+import Concierto from "./concierto.model.js";
 
 //Definimos el modelo
 export default class Empresa extends Model {
@@ -93,6 +82,7 @@ export default class Empresa extends Model {
 
 }
 
+/** 
 // Configurar el middleware para procesar JSON
 app.use(express.json());
 
@@ -224,3 +214,4 @@ app.listen(3000, () => {
 
 
 
+**/

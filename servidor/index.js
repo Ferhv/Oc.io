@@ -104,14 +104,14 @@ app.post('/concierto', (req, res) => {
 
 // --- TUTORIA --- 
 
-// Login
-app.post('/login', passport.authenticate('localCliente'), (req, res) => {
+// Login CLIENTE
+app.post('/loginCliente', passport.authenticate('localCliente'), (req, res) => {
     if (!!req.user) res.status(200).json(req.user) 
     else res.status(500).json({status: "error"})
 });
 
-// Registrar cliente --> OK
-app.post('/registrar', async (req, res) => {
+// Registrar CLIENTE --> OK
+app.post('/registrarCliente', async (req, res) => {
     const { nombre, email, password, dni, fecha, telefono } = req.body;
   
     //^ Validar que se proporcionen todos los campos requeridos
@@ -149,10 +149,61 @@ app.post('/registrar', async (req, res) => {
     }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
   });
   
-  // Borrar cliente --> OK
+  // Borrar CLIENTE --> OK
 app.post('/borrarCliente', async (req, res) => {
-const clienteId = req.body.id;
-Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+    const clienteId = req.body.id;
+    Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+});
+
+// Login EMPRESA
+app.post('/loginEmpresa', passport.authenticate('localEmpresa'), (req, res) => {
+    if (!!req.user) res.status(200).json(req.user) 
+    else res.status(500).json({status: "error"})
+});
+
+// Registrar EMPRESA --> OK
+app.post('/registrarEmpresa', async (req, res) => {
+    const { nombre, email, password, dni, fecha, telefono } = req.body;
+  
+    //^ Validar que se proporcionen todos los campos requeridos
+    if (!nombre || !email || !password || !dni || !fecha || !telefono) {
+      return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+    }
+  
+    //^Validar el formato del email
+    if (!esValidoEmail(email)) {
+      return res.status(400).json({ mensaje: 'Formato de email inválido' });
+    }
+  
+    // Validar el formato del DNI
+    if (!esValidoDNI(dni)) {
+      return res.status(400).json({ mensaje: 'Formato de DNI inválido' });
+    }
+  
+    // Validar el formato de la fecha de nacimiento
+    if (!esFechaValida(fecha)) {
+      return res.status(400).json({ mensaje: 'Formato de fecha inválido' });
+    }
+  
+    // Validar el formato del número de teléfono
+    if (!esTelefonoValido(telefono)) {
+      return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
+    }
+    //^ Guardar los datos del cliente en la base de datos
+    Cliente.query().insert({
+    nombre,
+    email,
+    fecha,
+    dni,
+    telefono: Number(telefono),
+    unsecurePassword: password
+    }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
+  });
+  
+  // Borrar EMPRESA --> OK
+app.post('/borrarEmpresa', async (req, res) => {
+    const clienteId = req.body.id;
+    Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
 });
 
 // Parámetros? 

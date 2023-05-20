@@ -1,5 +1,4 @@
 import { Model } from "objection";
-import express from 'express';
 import bcrypt from 'bcrypt';
 
 export default class Cliente extends Model {

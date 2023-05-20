@@ -2,15 +2,17 @@ import  Empresa  from './models/empresa.model.js';
 import  Concierto  from './models/concierto.model.js';
 import  Cliente  from './models/cliente.model.js';
 import Administrador from './models/administrador.model.js';
+
 import Knex from 'knex';
 import express from 'express';
 import cors from 'cors';
 import moment from 'moment';
-import { esTelefonoValido, esFechaValida, esValidoDNI, esValidoEmail } from './lib/validators.js';
+import { esTelefonoValido, esFechaValida, esValidoDNI, esValidoEmail, esValidoCIF } from './lib/validators.js';
 import { development } from './knexfile.js';
 import passport from 'passport';
 import session from 'express-session';
 import strategyInit from './lib/AuthStrategy.js';
+import strategyInit2 from './lib/AuthStrategy2.js';
 
 // Instanciamos Express y el middleware de JSON y CORS -
 const app = express();
@@ -21,13 +23,12 @@ app.use(cors());
 const dbConnection = Knex(development);
 Empresa.knex(dbConnection);
 Concierto.knex(dbConnection); 
-//ShowTiming.knex(dbConnection);
 Cliente.knex(dbConnection);
 Administrador.knex(dbConnection);
 
-// Inicialización del passport
+// TODO Inicialización del passport ======================================================================================================
 app.use(session({
-    secret: 'cines-session-cookie-key', // Secreto de la sesión (puede ser cualquier identificador unívoco de la app, esto no es público al usuario)
+    secret: 'cines-session-cookie-key', // Secreto de la sesión (puede ser cualquier identificador unívoco de la app, no es público al usuario)
     name: 'SessionCookie.SID', // Nombre de la sesión
     resave: true,
     saveUninitialized: false,
@@ -37,6 +38,22 @@ app.use(passport.session()); // passport.session() indica a Passport que usará 
 strategyInit(passport);
 
 
+//! REVISAR *************************************
+/*
+// TODO Inicialización del passport ======================================================================================================
+app.use(session({
+  secret: 'cines-session-cookie-key', 
+  name: 'SessionCookie.SID', 
+  resave: true,
+  saveUninitialized: false,
+}));
+app.use(passport.initialize()); 
+app.use(passport.session()); 
+strategyInit2(passport);*/
+
+
+//! REVISAR ********************************************
+/*
 // TODO Endpoint: POST /concierto --> Devuelve todas los conciertos ====================================================================
 //La función se ejecuta cuando se realiza una solicitud POST a esa ruta en el servidor
 app.post('/concierto', (req, res) => {
@@ -61,8 +78,8 @@ app.post('/concierto', (req, res) => {
         consulta.then(async results => {
             const finalObject = !!req.body.artistasArray 
 
-                ///^ Filtrado por artista
-                ? results.filter(elem => {
+                /
+                **? results.filter(elem => {
                     const artistasArray = elem.artistas.split(',');
                     return artistasArray.every(artista => req.body.artistas.includes(artista))
                 }) 
@@ -98,19 +115,32 @@ app.post('/concierto', (req, res) => {
     } else consulta.then(results => res.status(200).json(results));
 
 
-});
+});*/
 
-// TODO Endpoint: POST /empresas --> Devuelve todas las empresas ====================================================================
 
 // --- TUTORIA --- 
+// * ========================================================================================================================================= 
+// * =======================================================================  LOGIN ========================================================
+// * ========================================================================================================================================= 
 
 // Login CLIENTE
 app.post('/loginCliente', passport.authenticate('localCliente'), (req, res) => {
+
+// TODO Endpoint: POST /LOGIN  ================================================================================================
+app.post('/login', passport.authenticate('localCliente'), (req, res) => {
     if (!!req.user) res.status(200).json(req.user) 
     else res.status(500).json({status: "error"})
 });
 
+
 // Registrar CLIENTE --> OK
+
+
+// * ========================================================================================================================================= 
+// * =======================================================================  CLIENTE ======================================================== 
+// * ========================================================================================================================================= 
+
+// TODO Endpoint: POST /REGISTRAR CLIENTE --> Ok  ============================================================================================
 app.post('/registrarCliente', async (req, res) => {
     const { nombre, email, password, dni, fecha, telefono } = req.body;
   
@@ -124,17 +154,17 @@ app.post('/registrarCliente', async (req, res) => {
       return res.status(400).json({ mensaje: 'Formato de email inválido' });
     }
   
-    // Validar el formato del DNI
+    //^ Validar el formato del DNI
     if (!esValidoDNI(dni)) {
       return res.status(400).json({ mensaje: 'Formato de DNI inválido' });
     }
   
-    // Validar el formato de la fecha de nacimiento
+    //^ Validar el formato de la fecha de nacimiento
     if (!esFechaValida(fecha)) {
       return res.status(400).json({ mensaje: 'Formato de fecha inválido' });
     }
   
-    // Validar el formato del número de teléfono
+    //^ Validar el formato del número de teléfono
     if (!esTelefonoValido(telefono)) {
       return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
     }
@@ -149,7 +179,10 @@ app.post('/registrarCliente', async (req, res) => {
     }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
   });
   
+
   // Borrar CLIENTE --> OK
+
+// TODO Endpoint: POST /BORRAR CLIENTE --> Ok ========================================================================================
 app.post('/borrarCliente', async (req, res) => {
     const clienteId = req.body.id;
     Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
@@ -206,6 +239,127 @@ app.post('/borrarEmpresa', async (req, res) => {
     Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
 });
 
+
+
+
+// * ========================================================================================================================================= 
+// * =======================================================================  EMPRESA ========================================================  
+// * ========================================================================================================================================= 
+
+// TODO Endpoint: POST /REGISTRAR EMPRESA --> Ok  ============================================================================================
+app.post('/registrarEmpresa', async (req, res) => {
+  const { nombre, email, password, cif, domicilio_social, telefono, responsable, euros } = req.body;
+
+  //^ Validar que se proporcionen todos los campos requeridos 
+  if (!nombre || !email || !password || !cif || !domicilio_social || !telefono || !responsable || !euros) {
+    return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+  }
+
+  //^Validar el formato del email
+  if (!esValidoEmail(email)) {
+    return res.status(400).json({ mensaje: 'Formato de email inválido' });
+  }
+
+  //^ Validar el formato del CIF
+  if (!esValidoDNI(cif)) {
+    return res.status(400).json({ mensaje: 'Formato de CIF inválido' });
+  }
+
+  //^ Validar el formato del número de teléfono
+  if (!esTelefonoValido(telefono)) {
+    return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
+  }
+
+  // Guardar los datos de la empresa en la base de datos 
+  Empresa.query().insert({
+  nombre,
+  email,
+  cif,
+  domicilio_social,
+  telefono: Number(telefono),
+  unsecurePassword: password,
+  responsable,
+  euros: Number(number)
+  }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
+});
+
+
+// TODO Endpoint: POST /BORRAR EMPRESA --> Ok ========================================================================================
+app.post('/borrarEmpresa', async (req, res) => {
+  const empresaId = req.body.id;
+  Empresa.query().deleteById(empresaId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+  });
+
+
+
+// * ========================================================================================================================================= 
+// * =====================================================================  CONCIERTO ========================================================  
+// * ========================================================================================================================================= 
+
+// TODO Endpoint: POST /REGISTRAR CONCIERTO --> Ok  ============================================================================================
+app.post('/registrarConcierto', async (req, res) => {
+  const { nombre_evento, nombre_artista, ubicacion, aforo, descripcion, fecha, precio } = req.body;
+
+  //^ Validar que se proporcionen todos los campos requeridos 
+  if (!nombre_evento || !nombre_artista || !ubicacion || !aforo || !descripcion || !fecha || !precio ) {
+    return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+  }
+
+  //^ Validar el formato del número de teléfono
+  if (!esTelefonoValido(telefono)) {
+    return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
+  }
+
+  //^ Guardar los datos del concierto en la base de datos 
+  Conierto.query().insert({
+  nombre_evento,
+  nombre_artista,
+  ubicacion,
+  aforo: Number(aforo),
+  precio: Number(precio),
+  descripcion,
+  fecha
+  }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
+});
+
+
+// TODO Endpoint: POST /BORRAR CONCIERTO --> Ok ========================================================================================
+app.post('/borrarConcierto', async (req, res) => {
+  const conciertoId = req.body.id;
+  Concierto.query().deleteById(conciertoId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+  });
+
+
+
+// * ========================================================================================================================================= 
+// * =====================================================================  ADMINISTRADOR ====================================================  
+// * ========================================================================================================================================= 
+
+// ? ----------------------------- EMPRESA ---------------------------
+
+// TODO Endpoint: GET /LISTADO EMPRESAS NO VERIFICADAS ============================================
+app.get('/empresas/no-verificadas', async (req, res) => {
+  try {
+    // Obtener todas las empresas no verificadas de la base de datos
+    const empresasNoVerificadas = await Empresa.query().where('verificado', false);
+
+    res.status(200).json(empresasNoVerificadas);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener las empresas no verificadas' });
+  }
+});
+
+
+// TODO Ruta para que el administrador autorice una empresa =========================================
+
+// TODO  Ruta para que el administrador elimine una cuenta de empresa====================================================
+
+// ? ----------------------------- CLIENTE ---------------------------
+//TODO Ruta para que el administrador elimine una cuenta de cliente =======================================================
+
+
+
+
 // Parámetros? 
   app.get('/eventos/:id', async (req, res) => {
     const eventoId = req.params.id;
@@ -227,7 +381,7 @@ app.post('/borrarEmpresa', async (req, res) => {
   
   
 
-//^ Definimos el puerto 3000 como puerto de escucha y un mensaje de confirmación cuando el servidor esté levantado
+//^ Definimos el puerto 8080 
 app.listen(8080,() => {
     console.log(`Servidor escuchando en el puerto 8080`);
 });

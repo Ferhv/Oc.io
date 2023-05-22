@@ -1,7 +1,6 @@
 import passport from 'passport'
 import {Strategy as LocalStrategy} from 'passport-local' // Importamos la estrategia passport-local con el nombre "LocalStrategy"
 import Cliente from '../models/cliente.model.js'
-import Empresa from '../models/empresa.model.js'
 
 // Passport.use() aplica el middleware pasado por parámetros a la instancia de Passport
 // (algo parecido a lo que hacemos con Express.use() para definir middlewares de Express)

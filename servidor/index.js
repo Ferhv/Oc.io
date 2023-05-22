@@ -66,73 +66,6 @@ app.use(passport.session());
 strategyInit3(passport);
 
 
-//! REVISAR ********************************************
-/*
-// TODO Endpoint: POST /concierto --> Devuelve todas los conciertos ====================================================================
-//La función se ejecuta cuando se realiza una solicitud POST a esa ruta en el servidor
-app.post('/concierto', (req, res) => {
-
-    // La consulta se define como una instancia del modelo "Concierto" y se llama "consulta"
-    //Método "throwIfNotFound()" para garantizar que se produzca un error si no se encuentra ningun concierto en la base de datos
-    const consulta = Concierto.query();
-    if (!!req.body && req.body !== {}) {
-
-        //^ Filtrado por ID
-        //Se verifica si el cuerpo de la solicitud no está vacío y si contiene algún valor
-        //Si contiene algún valor, la función comienza a aplicar filtros a la consulta.
-        if (!!req.body.id) consulta.findById(req.body.id);
-
-        //^ Filtrado por fechas
-        if (!!req.body.sessionBefore || !!req.body.sessionAfter) {
-            consulta.withGraphJoined('sessions');
-            if (!!req.body.sessionBefore) consulta.where('sessions.day', '<=', req.body.sessionBefore);
-            if (!!req.body.sessionAfter) consulta.where('sessions.day', '>=', req.body.sessionAfter);
-        }
-
-        consulta.then(async results => {
-            const finalObject = !!req.body.artistasArray 
-
-                /
-                **? results.filter(elem => {
-                    const artistasArray = elem.artistas.split(',');
-                    return artistasArray.every(artista => req.body.artistas.includes(artista))
-                }) 
-                : results;
-            if (!!req.body.sessionBefore || !!req.body.sessionAfter) {
-
-                //^ Formateo de cartelera
-                //Devuelve una lista de objetos de película que cumplen con ciertos criterios de filtro
-
-                //La variable "formattedObject" es un objeto que se construye a partir de los resultados de la consulta 
-                //Este objeto se construye utilizando el método "map()" que itera sobre cada elemento del array "finalObject" 
-                //y devuelve un nuevo array con los elementos formateados según los requisitos de la función.
-                const formattedObject = await Promise.all(finalObject.map(async elem => {
-                    return {
-                        ...elem,
-                        sessions: await Promise.all(elem.sessions.map(async session => {
-                            const empresaInfo = await Concierto.query().findById(session.empresa_id);
-                            const timingInfo = await Timeslot.query().findById(session.timing_id);
-                            return {
-                                empresa: empresaInfo.name,
-                                day: moment(session.day).format('DD/MM/YYYY'),
-                                start: timingInfo.start_time,
-                                end: timingInfo.end_time,
-                            }
-                        }))
-                    }
-                }));
-                res.status(200).json(formattedObject);
-            } else res.status(200).json(finalObject);
-            
-
-        })
-    } else consulta.then(results => res.status(200).json(results));
-
-
-});*/
-
-
-// --- TUTORIA --- 
 // * ========================================================================================================================================= 
 // * =======================================================================  LOGIN ==========================================================
 // * ========================================================================================================================================= 
@@ -157,7 +90,6 @@ app.post('/loginAdmin', passport.authenticate('localAdmin'), (req, res) => {
 });
 
 
-// Registrar CLIENTE --> OK
 
 
 // * ========================================================================================================================================= 
@@ -204,66 +136,11 @@ app.post('/registrarCliente', async (req, res) => {
   });
   
 
-  // Borrar CLIENTE --> OK
-
 // TODO Endpoint: POST /BORRAR CLIENTE --> Ok ========================================================================================
 app.post('/borrarCliente', async (req, res) => {
     const clienteId = req.body.id;
     Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
 });
-
-// Login EMPRESA
-app.post('/loginEmpresa', passport.authenticate('localEmpresa'), (req, res) => {
-    if (!!req.user) res.status(200).json(req.user) 
-    else res.status(500).json({status: "error"})
-});
-
-// Registrar EMPRESA --> OK
-app.post('/registrarEmpresa', async (req, res) => {
-    const { nombre, email, password, dni, fecha, telefono } = req.body;
-  
-    //^ Validar que se proporcionen todos los campos requeridos
-    if (!nombre || !email || !password || !dni || !fecha || !telefono) {
-      return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
-    }
-  
-    //^Validar el formato del email
-    if (!esValidoEmail(email)) {
-      return res.status(400).json({ mensaje: 'Formato de email inválido' });
-    }
-  
-    // Validar el formato del DNI
-    if (!esValidoDNI(dni)) {
-      return res.status(400).json({ mensaje: 'Formato de DNI inválido' });
-    }
-  
-    // Validar el formato de la fecha de nacimiento
-    if (!esFechaValida(fecha)) {
-      return res.status(400).json({ mensaje: 'Formato de fecha inválido' });
-    }
-  
-    // Validar el formato del número de teléfono
-    if (!esTelefonoValido(telefono)) {
-      return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
-    }
-    //^ Guardar los datos del cliente en la base de datos
-    Cliente.query().insert({
-    nombre,
-    email,
-    fecha,
-    dni,
-    telefono: Number(telefono),
-    unsecurePassword: password
-    }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
-  });
-  
-  // Borrar EMPRESA --> OK
-app.post('/borrarEmpresa', async (req, res) => {
-    const clienteId = req.body.id;
-    Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
-});
-
-
 
 
 // * ========================================================================================================================================= 
@@ -317,17 +194,78 @@ app.post('/borrarEmpresa', async (req, res) => {
 
 // TODO Endpoint: GET /LISTADO CONCIERTOS POR EMPRESA --> Ok ===============================================================================
 app.get('/conciertosPorEmpresa', async (req, res) => {
-  const emailEmpresa = req.query.id;
 
+const emailEmpresa = req.query.id;
+
+try {
+  // Obtener los conciertos que coinciden con el email de la empresa
+  const conciertos = await Concierto.query()
+    .where('empresa_email', emailEmpresa)
+
+  res.status(200).json(conciertos);
+} catch (error) {
+  res.status(500).json({ error: 'Error al obtener los conciertos por empresa' });
+}
+});
+
+// ! BORRADOR Endpoint: PUT ==================================================================================================================
+app.put('/eventos/:idConcierto', async (req, res) => {
+  const idConcierto = req.params.idConcierto;
+  const nuevosDatosConcierto = req.body;
+  
   try {
-    // Obtener los conciertos que coinciden con el email de la empresa
-    const conciertos = await Concierto.query().where('empresa_email', emailEmpresa);
-
-    res.status(200).json(conciertos);
+    
+    // Actualizar el evento por su ID
+    // Patch -> para actualizar los campos del concierto en la base de datos
+    await Concierto.query().findById(idConcierto).patch(nuevosDatosConcierto);
+    
+    res.status(200).json({ status: 'OK' });
+    
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los conciertos por empresa' });
+    res.status(500).json({ error: 'Error al actualizar la informacion del Concierto' });
   }
 });
+debugger;
+
+// ! BORRADOR ===============================================================================
+/*app.delete('/eventos/:idEvento', async (req, res) => {
+  const idEvento = req.params.id;
+  
+  try {
+    // Eliminar el evento por su ID
+    await Concierto.query().deleteById(idEvento);
+    
+    res.status(200).json({ status: 'OK' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el evento' });
+  }
+});*/
+
+
+// ! BORRADOR ===============================================================================
+app.get('/pantallaPrincipal', async (req, res) => {
+  const idEmpresa = req.params.id;
+  try {
+    // Obtener el estado de verificación de la empresa por su ID
+    const empresa = await Empresa.query().findById(idEmpresa);
+
+    if (!empresa) {
+      return res.status(404).json({ error: 'Empresa no encontrada' });
+    }
+
+    let mensaje = ''; // Mensaje por defecto
+    if (!empresa.verificado) {
+      // Si la empresa no está verificada, asignar el mensaje de cuenta temporal
+      mensaje = 'Su cuenta es temporal y está pendiente de verificación por parte del administrador.';
+    }
+
+    res.render('pantallaPrincipal', { mensaje });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el estado de verificación de la empresa' });
+  }
+});
+
+
 
 
 // * ========================================================================================================================================= 
@@ -364,11 +302,11 @@ app.post('/borrarConcierto', async (req, res) => {
   });
 
 
-// TODO Endpoint: GET /MOSTRAR LISTADO CONCIERTOS DISPONIBLES ===============================================================================
+// TODO  Endpoint: GET / LISTADO CONCIERTOS QUE NO HAYAN PASADO DE FECHA =====================================================================
 app.get('/eventosDisponibles', async (req, res) => {
   try {
     // Obtener los eventos disponibles (que no hayan pasado)
-    const eventos = await Evento.query().where('fecha', '>', new Date());
+    const eventos = await Concierto.query().where('fecha', '>', new Date());
 
     res.status(200).json(eventos);
   } catch (error) {
@@ -377,31 +315,31 @@ app.get('/eventosDisponibles', async (req, res) => {
 });
 
 
-// TODO Endpoint: GET /DETALLES DEL EVENTO SELEECIONADO =======================================================================================
-app.get('/detallesEvento/:idEvento', async (req, res) => {
-  const idEvento = req.params.id;
+// ! BORRADOR =======================================================================================
+/*app.get('/detallesEvento', async (req, res) => {
+  const idEvento = req.params.id; 
 
   try {
     // Obtener los detalles del evento por su ID
-    const evento = await Concierto.query().findById(id);
+    const concierto = await Concierto.query().findById(idEvento); 
 
-    if (!evento) {
+    if (!concierto) {
       return res.status(404).json({ error: 'Evento no encontrado' });
     }
 
     // Comprobar si la empresa está verificada
-    const empresa = await Empresa.query().findById(evento.empresa_id);
+    const empresa = await Empresa.query().findById(concierto.empresa_email); 
 
     let mensajeEmpresaNoVerificada = '';
     if (empresa && !empresa.verificado) {
       mensajeEmpresaNoVerificada = 'Esta empresa no está verificada.';
     }
 
-    res.status(200).json({ evento, mensajeEmpresaNoVerificada });
+    res.status(200).json({ concierto, mensajeEmpresaNoVerificada });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los detalles del concierto' });
   }
-});
+});*/
 
 
 // ! BORRADOR =======================================================================================
@@ -410,7 +348,7 @@ app.post('/comprarEntradas', async (req, res) => {
 
   try {
     // Obtener los detalles del evento por su ID
-    const evento = await Evento.query().findById(idEvento);
+    const evento = await Concierto.query().findById(idEvento);
 
     if (!evento) {
       return res.status(404).json({ error: 'Evento no encontrado' });
@@ -423,7 +361,7 @@ app.post('/comprarEntradas', async (req, res) => {
       return res.status(400).json({ error: 'La transacción de pago no es válida' });
     }
 
-      //^ Guardar los datos del concierto en la base de datos 
+
       Entradas.query().insert({
         evento_id: idEvento,
         cantidad_entradas: cantidadEntradas,
@@ -489,7 +427,7 @@ app.get('/empresasLista', async (req, res) => {
 });
 
 
-// ! Endpoint: GET / AUTORIZAR UNA EMPRESA =========================================
+// TODO Endpoint: GET / AUTORIZAR UNA EMPRESA =========================================
 app.post('/verificarEmpresa', async (req, res) => {
   const empresaId = req.body.id;
   

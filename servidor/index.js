@@ -13,7 +13,7 @@ import passport from 'passport';
 import session from 'express-session';
 import strategyInit from './lib/AuthStrategy.js';
 import strategyInit2 from './lib/AuthStrategy2.js';
-//import strategyInit3 from './lib/AuthStrategy3,js';
+import strategyInit3 from './lib/AuthStrategy3.js';
 
 // Instanciamos Express y el middleware de JSON y CORS -
 const app = express();
@@ -56,15 +56,14 @@ strategyInit2(passport);
 
 
 // TODO Inicialización del passport ADMIN ================================================================================================
-/*ssapp.use(session({
+app.use(session({
   secret: 'cines-session-cookie-key', 
   name: 'SessionCookie.SID', 
-  resave: true,
   saveUninitialized: false,
 }));
 app.use(passport.initialize()); 
 app.use(passport.session()); 
-strategyInit3(passport);*/
+strategyInit3(passport);
 
 
 //! REVISAR ********************************************
@@ -139,6 +138,7 @@ app.post('/concierto', (req, res) => {
 // * ========================================================================================================================================= 
 
 // TODO Endpoint: POST /LOGIN  CLIENTE ================================================================================================
+
 app.post('/login', passport.authenticate('localCliente'), (req, res) => {
     if (!!req.user) res.status(200).json(req.user) 
     else res.status(500).json({status: "error"})
@@ -156,6 +156,8 @@ app.post('/loginAdmin', passport.authenticate('localAdmin'), (req, res) => {
   else res.status(500).json({status: "error"})
 });
 
+
+// Registrar CLIENTE --> OK
 
 
 // * ========================================================================================================================================= 
@@ -202,10 +204,63 @@ app.post('/registrarCliente', async (req, res) => {
   });
   
 
+  // Borrar CLIENTE --> OK
+
 // TODO Endpoint: POST /BORRAR CLIENTE --> Ok ========================================================================================
 app.post('/borrarCliente', async (req, res) => {
-const clienteId = req.body.id;
-Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+    const clienteId = req.body.id;
+    Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+});
+
+// Login EMPRESA
+app.post('/loginEmpresa', passport.authenticate('localEmpresa'), (req, res) => {
+    if (!!req.user) res.status(200).json(req.user) 
+    else res.status(500).json({status: "error"})
+});
+
+// Registrar EMPRESA --> OK
+app.post('/registrarEmpresa', async (req, res) => {
+    const { nombre, email, password, dni, fecha, telefono } = req.body;
+  
+    //^ Validar que se proporcionen todos los campos requeridos
+    if (!nombre || !email || !password || !dni || !fecha || !telefono) {
+      return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+    }
+  
+    //^Validar el formato del email
+    if (!esValidoEmail(email)) {
+      return res.status(400).json({ mensaje: 'Formato de email inválido' });
+    }
+  
+    // Validar el formato del DNI
+    if (!esValidoDNI(dni)) {
+      return res.status(400).json({ mensaje: 'Formato de DNI inválido' });
+    }
+  
+    // Validar el formato de la fecha de nacimiento
+    if (!esFechaValida(fecha)) {
+      return res.status(400).json({ mensaje: 'Formato de fecha inválido' });
+    }
+  
+    // Validar el formato del número de teléfono
+    if (!esTelefonoValido(telefono)) {
+      return res.status(400).json({ mensaje: 'Formato de número de teléfono inválido' });
+    }
+    //^ Guardar los datos del cliente en la base de datos
+    Cliente.query().insert({
+    nombre,
+    email,
+    fecha,
+    dni,
+    telefono: Number(telefono),
+    unsecurePassword: password
+    }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
+  });
+  
+  // Borrar EMPRESA --> OK
+app.post('/borrarEmpresa', async (req, res) => {
+    const clienteId = req.body.id;
+    Cliente.query().deleteById(clienteId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
 });
 
 
@@ -262,19 +317,17 @@ app.post('/borrarEmpresa', async (req, res) => {
 
 // TODO Endpoint: GET /LISTADO CONCIERTOS POR EMPRESA --> Ok ===============================================================================
 app.get('/conciertosPorEmpresa', async (req, res) => {
-  const empresaEmail = req.query.email;
+  const emailEmpresa = req.query.id;
 
   try {
-    // Obtener los conciertos que coincidan con el email de la empresa
-    const conciertos = await Concierto.query().where('empresa_email', empresaEmail);
+    // Obtener los conciertos que coinciden con el email de la empresa
+    const conciertos = await Concierto.query().where('empresa_email', emailEmpresa);
 
     res.status(200).json(conciertos);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los conciertos por empresa' });
   }
 });
-
-    
 
 
 // * ========================================================================================================================================= 
@@ -310,7 +363,82 @@ app.post('/borrarConcierto', async (req, res) => {
   Concierto.query().deleteById(conciertoId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
   });
 
-  
+
+// TODO Endpoint: GET /MOSTRAR LISTADO CONCIERTOS DISPONIBLES ===============================================================================
+app.get('/eventosDisponibles', async (req, res) => {
+  try {
+    // Obtener los eventos disponibles (que no hayan pasado)
+    const eventos = await Evento.query().where('fecha', '>', new Date());
+
+    res.status(200).json(eventos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los eventos disponibles' });
+  }
+});
+
+
+// TODO Endpoint: GET /DETALLES DEL EVENTO SELEECIONADO =======================================================================================
+app.get('/detallesEvento/:idEvento', async (req, res) => {
+  const idEvento = req.params.id;
+
+  try {
+    // Obtener los detalles del evento por su ID
+    const evento = await Concierto.query().findById(id);
+
+    if (!evento) {
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    // Comprobar si la empresa está verificada
+    const empresa = await Empresa.query().findById(evento.empresa_id);
+
+    let mensajeEmpresaNoVerificada = '';
+    if (empresa && !empresa.verificado) {
+      mensajeEmpresaNoVerificada = 'Esta empresa no está verificada.';
+    }
+
+    res.status(200).json({ evento, mensajeEmpresaNoVerificada });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los detalles del concierto' });
+  }
+});
+
+
+// ! BORRADOR =======================================================================================
+app.post('/comprarEntradas', async (req, res) => {
+  const { idEvento, cantidadEntradas, numeroTarjeta, cvv, fechaCaducidad } = req.body;
+
+  try {
+    // Obtener los detalles del evento por su ID
+    const evento = await Evento.query().findById(idEvento);
+
+    if (!evento) {
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    // Realizar la validación y proceso de pago con la pasarela de pago
+    const transaccionValida = await pasarelaPago.validarTransaccion(numeroTarjeta, cvv, fechaCaducidad);
+
+    if (!transaccionValida) {
+      return res.status(400).json({ error: 'La transacción de pago no es válida' });
+    }
+
+      //^ Guardar los datos del concierto en la base de datos 
+      Entradas.query().insert({
+        evento_id: idEvento,
+        cantidad_entradas: cantidadEntradas,
+        fecha_compra: new Date(),
+        monto_pagado: evento.precio * cantidadEntradas,
+        tarjeta_ultimos_digitos: numeroTarjeta.slice(-4),
+      }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
+
+
+    res.status(200).json({ mensaje: 'Compra de entradas realizada exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al procesar la compra de entradas' });
+  }
+});
+
 // * ========================================================================================================================================= 
 // * =====================================================================  ADMINISTRADOR ====================================================  
 // * ========================================================================================================================================= 
@@ -402,6 +530,4 @@ app.post('/verificarEmpresa', async (req, res) => {
 app.listen(8080,() => {
     console.log(`Servidor escuchando en el puerto 8080`);
 });
-
-
 

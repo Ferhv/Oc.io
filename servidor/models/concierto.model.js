@@ -1,4 +1,5 @@
 import { Model } from "objection";
+import  Empresa  from './empresa.model.js';
 
 export default class Concierto extends Model {
 
@@ -40,6 +41,16 @@ export default class Concierto extends Model {
   };
 
 
+  static relationMappings = { //Se define una relaccion llamada empresa
+    empresa: {
+      relation: Model.BelongsToOneRelation, //Un concierto pertenece a una empresa
+      modelClass: Empresa,
+      join: { //Especifica los detalles de la relación
+        from: "concierto.empresa_email",
+        to: "empresa.email",
+      },
+    },
+  };
 
 }
 

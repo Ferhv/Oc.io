@@ -9,20 +9,20 @@ import * as React from 'react';
 
 
 export const ConciertosTable = () => {
-  const [movies, setConciertos] = useState([]);
+  const [conciertos, setConciertos] = useState([]);
   useEffect(() => {
     axios({
-        url: 'http://localhost:8080/movies',
+        url: 'http://localhost:8080/conciertos',
         method: 'POST',
     })
     .then(res => {
-        setMovies(res.data);
+        setConciertos(res.data);
     })
     .catch(err => console.log(err))
 }, []);
 
   <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
-  {movies.map((item, index) => (
+  {conciertos.map((item, index) => (
     <ImageListItem key={item.img}>
       <img
         src={`../assets/img/${index}.png`}
@@ -33,4 +33,4 @@ export const ConciertosTable = () => {
   ))}
 </ImageList>
 }
-export default MoviesTable;
+export default ConciertosTable;

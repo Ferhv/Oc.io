@@ -85,20 +85,20 @@ export const CinemasTable = () => {
     }]);
     useEffect(() => {
         axios({
-            url: 'http://localhost:8080/cinemas',
+            url: 'http://localhost:8080/empresas',
             method: 'POST',
             data: {
                 withCatalog: true
             }
         })
         .then(res => {
-            setCinemas(res.data);
+            setEmpresas(res.data);
         })
         .catch(err => console.log(err))
     }, []);
 
         
-    return (cinemas.length > 0 && !!cinemas[0].id && 
+    return (empresas.length > 0 && !!empresas[0].id && 
         <TableContainer component={Paper}>
             <Table aria-label="collapsible table">
                 <TableHead>

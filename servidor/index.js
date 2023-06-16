@@ -1,5 +1,5 @@
 import  Empresa  from './models/empresa.model.js';
-import  Concierto  from './models/concierto.model.js';
+import  Crucero  from './models/crucero.model.js';
 import  Cliente  from './models/cliente.model.js';
 import Administrador from './models/administrador.model.js';
 
@@ -23,7 +23,7 @@ app.use(cors());
 // Conexiones a la base de datos
 const dbConnection = Knex(development);
 Empresa.knex(dbConnection);
-Concierto.knex(dbConnection); 
+Crucero.knex(dbConnection); 
 Cliente.knex(dbConnection);
 Administrador.knex(dbConnection);
 
@@ -144,7 +144,7 @@ app.post('/borrarCliente', async (req, res) => {
 
 
 // * ========================================================================================================================================= 
-// * =======================================================================  EMPRESA ========================================================  
+// * =======================================================================  EMPRESA- NAVIERA ========================================================  
 // * ========================================================================================================================================= 
 
 // TODO Endpoint: POST /REGISTRAR EMPRESA --> Ok  ============================================================================================
@@ -177,7 +177,7 @@ app.post('/registrarEmpresa', async (req, res) => {
   email,
   unsecurePassword: password,
   cif,
-  domicilio_social,
+  puerto,
   telefono: Number(telefono),
   responsable,
   euros: Number(euros)
@@ -192,37 +192,37 @@ app.post('/borrarEmpresa', async (req, res) => {
   });
 
 
-// TODO Endpoint: GET /LISTADO CONCIERTOS POR EMPRESA --> Ok ===============================================================================
-app.get('/conciertosPorEmpresa', async (req, res) => {
+// TODO Endpoint: GET /LISTADO CRUCEROS POR EMPRESA --> Ok ===============================================================================
+app.get('/crucerosPorEmpresa', async (req, res) => {
 
 const emailEmpresa = req.query.id;
 
 try {
-  // Obtener los conciertos que coinciden con el email de la empresa
-  const conciertos = await Concierto.query()
+  // Obtener los cruceros que coinciden con el email de la empresa
+  const cruceros = await Crucero.query()
     .where('empresa_email', emailEmpresa)
 
-  res.status(200).json(conciertos);
+  res.status(200).json(cruceros);
 } catch (error) {
-  res.status(500).json({ error: 'Error al obtener los conciertos por empresa' });
+  res.status(500).json({ error: 'Error al obtener los cruceros por empresa' });
 }
 });
 
 // ! BORRADOR Endpoint: PUT ==================================================================================================================
-app.put('/eventos/:idConcierto', async (req, res) => {
-  const idConcierto = req.params.idConcierto;
-  const nuevosDatosConcierto = req.body;
+app.put('/eventos/:idCrucero', async (req, res) => {
+  const idCrucero = req.params.idCrucero;
+  const nuevosDatosCrucero = req.body;
   
   try {
     
-    // Actualizar el evento por su ID
-    // Patch -> para actualizar los campos del concierto en la base de datos
-    await Concierto.query().findById(idConcierto).patch(nuevosDatosConcierto);
+    // Actualizar el crucero por su ID
+    // Patch -> para actualizar los campos del crucero en la base de datos
+    await Crucero.query().findById(idCrucero).patch(nuevosDatosCrucero);
     
     res.status(200).json({ status: 'OK' });
     
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar la informacion del Concierto' });
+    res.status(500).json({ error: 'Error al actualizar la informacion del Crucero' });
   }
 });
 debugger;
@@ -266,25 +266,23 @@ app.get('/pantallaPrincipal', async (req, res) => {
 });
 
 
-
-
 // * ========================================================================================================================================= 
-// * =====================================================================  CONCIERTO ========================================================  
+// * =====================================================================  CRUCERO ========================================================  
 // * ========================================================================================================================================= 
 
-// TODO Endpoint: POST /REGISTRAR CONCIERTO --> Ok  ============================================================================================
-app.post('/registrarConcierto', async (req, res) => {
-  const { nombre_evento, nombre_artista, ubicacion, aforo, descripcion, fecha, precio, empresa_email } = req.body;
+// TODO Endpoint: POST /REGISTRAR CRUCERO --> Ok  ============================================================================================
+app.post('/registrarCrucero', async (req, res) => {
+  const { nombre, puerto_origen, ubicacion, aforo, descripcion, fecha, precio, empresa_email } = req.body;
 
   //^ Validar que se proporcionen todos los campos requeridos 
-  if (!nombre_evento || !nombre_artista || !ubicacion || !aforo || !descripcion || !fecha || !precio || !empresa_email ) {
+  if (!nombre || !puerto_origen || !ubicacion || !aforo || !descripcion || !fecha || !precio || !empresa_email ) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
-  //^ Guardar los datos del concierto en la base de datos 
+  //^ Guardar los datos del crucero en la base de datos 
   Concierto.query().insert({
-   nombre_evento,
-    nombre_artista,
+    nombre,
+    puerto_origen,
     ubicacion,
     aforo: Number(aforo),
     precio: Number(precio),

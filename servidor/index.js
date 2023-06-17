@@ -272,10 +272,10 @@ app.get('/pantallaPrincipal', async (req, res) => {
 
 // TODO Endpoint: POST /REGISTRAR CRUCERO --> Ok  ============================================================================================
 app.post('/registrarCrucero', async (req, res) => {
-  const { nombre, puerto_origen, ubicacion, aforo, descripcion, fecha, precio, empresa_email } = req.body;
+  const { nombre, puerto_origen, ubicacion, aforo, descripcion, fecha, hora, precio, empresa_email } = req.body;
 
   //^ Validar que se proporcionen todos los campos requeridos 
-  if (!nombre || !puerto_origen || !ubicacion || !aforo || !descripcion || !fecha || !precio || !empresa_email ) {
+  if (!nombre || !puerto_origen || !ubicacion || !aforo || !descripcion || !fecha || !hora || !precio || !empresa_email ) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
@@ -288,23 +288,24 @@ app.post('/registrarCrucero', async (req, res) => {
     precio: Number(precio),
     descripcion,
     fecha,
+    hora,
     empresa_email
   }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
 });
 
 
-// TODO Endpoint: POST /BORRAR CONCIERTO --> Ok ========================================================================================
-app.post('/borrarConcierto', async (req, res) => {
-  const conciertoId = req.body.id;
-  Concierto.query().deleteById(conciertoId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
+// TODO Endpoint: POST /BORRAR CRUCERO --> Ok ========================================================================================
+app.post('/borrarCrucero', async (req, res) => {
+  const cruceroId = req.body.id;
+  Crucero.query().deleteById(cruceroId).then(results => res.status(200).json({status: "OK"})).catch(err => res.status(500).json({error: err}));
   });
 
 
-// TODO  Endpoint: GET / LISTADO CONCIERTOS QUE NO HAYAN PASADO DE FECHA =====================================================================
+// TODO  Endpoint: GET / LISTADO CRUCEROS QUE NO HAYAN PASADO DE FECHA =====================================================================
 app.get('/eventosDisponibles', async (req, res) => {
   try {
     // Obtener los eventos disponibles (que no hayan pasado)
-    const eventos = await Concierto.query().where('fecha', '>', new Date());
+    const eventos = await Crucero.query().where('fecha', '>', new Date());
 
     res.status(200).json(eventos);
   } catch (error) {
@@ -436,8 +437,6 @@ app.post('/verificarEmpresa', async (req, res) => {
     res.status(500).json({ error: 'Error al marcar la empresa como verificada' });
   }
 });
-
-
 
 
 

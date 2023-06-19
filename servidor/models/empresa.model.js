@@ -26,7 +26,7 @@ export default class Empresa extends Model {
       cif: {
         type: "string",
       },
-      domicilio_social: {
+      puerto: {
         type: "string",
       },
       telefono: {

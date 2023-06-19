@@ -34,6 +34,7 @@ export default class Cliente extends Model {
       },
       telefono: {
         type: "integer",
+        maxLength: 9,
       }
     },
   };

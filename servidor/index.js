@@ -43,7 +43,6 @@ app.use(passport.initialize()); // passport.initialize() inicializa Passport
 app.use(passport.session()); // passport.session() indica a Passport que usará sesiones
 strategyInit(passport);
 
-
 // TODO Inicialización del passport EMPRESA ================================================================================================
 app.use(session({
   secret: 'cines-session-cookie-key', 

@@ -8,21 +8,21 @@ import {Link} from 'react-router-dom';
 import * as React from 'react';
 
 
-export const ConciertosTable = () => {
-  const [conciertos, setConciertos] = useState([]);
+export const CrucerosTable = () => {
+  const [conciertos, setCruceros] = useState([]);
   useEffect(() => {
     axios({
-        url: 'http://localhost:8080/conciertos',
+        url: 'http://localhost:8080/cruceros',
         method: 'POST',
     })
     .then(res => {
-        setConciertos(res.data);
+        setCruceros(res.data);
     })
     .catch(err => console.log(err))
 }, []);
 
   <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
-  {conciertos.map((item, index) => (
+  {cruceros.map((item, index) => (
     <ImageListItem key={item.img}>
       <img
         src={`../assets/img/${index}.png`}
@@ -33,4 +33,4 @@ export const ConciertosTable = () => {
   ))}
 </ImageList>
 }
-export default ConciertosTable;
+export default CrucerosTable;

@@ -37,9 +37,6 @@ export default class Empresa extends Model {
       },
       euros: {
         type: "integer",
-      },
-      verificado: {
-        type: "boolean"
       }
     },
   };

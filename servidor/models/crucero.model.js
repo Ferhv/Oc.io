@@ -4,19 +4,22 @@ import  Empresa  from './empresa.model.js';
 export default class Crucero extends Model {
 
   // Nombre de la tabla
-  static tableName = "crucero";//TODO  ========================================   CONCIERTO   =============================================
+  static tableName = "crucero";//TODO  ========================================   CRUCERO   =============================================
 
   // Clave primaria
-  static idColumn = "nombre_evento";
+  static idColumn = "id";
 
   // Esquema de datos
   static jsonSchema = {
     type: "object",
     properties: {
+      id: {
+        type: "integer",
+      },
       nombre: {
         type: "string",
       },
-      puerto_origen: {
+      puerto: {
         type: "string",
       },
       ubicacion: {
@@ -39,9 +42,10 @@ export default class Crucero extends Model {
       },
       empresa_email: {
         type: "string",
-      }
+      },
     },
   };
+
 
 
   static relationMappings = { //Se define una relaccion llamada empresa

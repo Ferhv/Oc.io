@@ -149,10 +149,10 @@ app.post('/borrarCliente', async (req, res) => {
 
 // TODO Endpoint: POST /REGISTRAR EMPRESA --> Ok  ============================================================================================
 app.post('/registrarEmpresa', async (req, res) => {
-  const { nombre, email, password, cif, domicilio_social, telefono, responsable, euros} = req.body;
+  const { nombre, email, password, cif, puerto, telefono, responsable, euros} = req.body;
 
   //^ Validar que se proporcionen todos los campos requeridos 
-  if (!nombre || !email || !password || !cif || !domicilio_social || !telefono || !responsable || !euros) {
+  if (!nombre || !email || !password || !cif || !puerto  || !telefono || !responsable || !euros) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
@@ -272,17 +272,17 @@ app.get('/pantallaPrincipal', async (req, res) => {
 
 // TODO Endpoint: POST /REGISTRAR CRUCERO --> Ok  ============================================================================================
 app.post('/registrarCrucero', async (req, res) => {
-  const { nombre, puerto_origen, ubicacion, aforo, descripcion, fecha, hora, precio, empresa_email } = req.body;
+  const { nombre, puerto, ubicacion, aforo, descripcion, fecha, hora, precio, empresa_email } = req.body;
 
   //^ Validar que se proporcionen todos los campos requeridos 
-  if (!nombre || !puerto_origen || !ubicacion || !aforo || !descripcion || !fecha || !hora || !precio || !empresa_email ) {
+  if (!nombre || !puerto || !ubicacion || !aforo || !descripcion || !fecha || !hora || !precio || !empresa_email ) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
   //^ Guardar los datos del crucero en la base de datos 
-  Concierto.query().insert({
+  Crucero.query().insert({
     nombre,
-    puerto_origen,
+    puerto,
     ubicacion,
     aforo: Number(aforo),
     precio: Number(precio),
@@ -302,7 +302,7 @@ app.post('/borrarCrucero', async (req, res) => {
 
 
 // TODO  Endpoint: GET / LISTADO CRUCEROS QUE NO HAYAN PASADO DE FECHA =====================================================================
-app.get('/eventosDisponibles', async (req, res) => {
+app.get('/crucerosDisponibles', async (req, res) => {
   try {
     // Obtener los eventos disponibles (que no hayan pasado)
     const eventos = await Crucero.query().where('fecha', '>', new Date());

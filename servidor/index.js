@@ -209,7 +209,7 @@ try {
 });
 
 // ! BORRADOR Endpoint: PUT ==================================================================================================================
-app.put('/eventos/:idCrucero', async (req, res) => {
+app.put('/cruceros/:idCrucero', async (req, res) => {
   const idCrucero = req.params.idCrucero;
   const nuevosDatosCrucero = req.body;
   

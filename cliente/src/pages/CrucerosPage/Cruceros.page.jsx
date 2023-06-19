@@ -1,7 +1,7 @@
 import {Paper, Typography} from '@mui/material';
 import {Header} from '../../components/Header.component';
 import { useEffect } from 'react';
-import EmpresasTable from './components/ConciertosTable.component';
+import EmpresasTable from './components/CrucerosTable.component';
 export const EmpresasPage = () => {
     useEffect(() => {
       document.title = "EMPRESAS";

@@ -26,6 +26,7 @@ const dbConnection = Knex(development);
 Empresa.knex(dbConnection);
 Crucero.knex(dbConnection); 
 Cliente.knex(dbConnection);
+Compra.knex(dbConnection);
 Administrador.knex(dbConnection);
 
 
@@ -342,12 +343,54 @@ app.get('/crucerosDisponibles', async (req, res) => {
 });*/
 
 
+
+// * ========================================================================================================================================= 
+// * =======================================================================  COMPRA =========================================================  
+// * ========================================================================================================================================= 
+
+// ! BORRADOR =======================================================================================
+//! Función para cifrar datos
+/*const crypto = require('crypto');
+const encryptData = (data) => {
+  try {
+    const buffer = Buffer.from(data);
+    const encryptedData = crypto.publicEncrypt(
+      {
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      buffer
+    );
+    return encryptedData.toString('base64');
+  } catch (error) {
+    throw new Error('Error al cifrar los datos');
+  }
+};*/
+
+
+//! Función para descifrar datos
+/*const decryptData = (encryptedData) => {
+  try {
+    const buffer = Buffer.from(encryptedData, 'base64');
+    const decryptedData = crypto.privateDecrypt(
+      {
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      buffer
+    );
+    return decryptedData.toString();
+  } catch (error) {
+    throw new Error('Error al descifrar los datos');
+  }
+};*/
+
 // ! BORRADOR =======================================================================================
 //! Endpoint para comprar billetes
 app.post('/comprarBilletes', async (req, res) => {
   const { cruceroId, cantidadBilletes, datosTarjeta } = req.body;
 
-  //^ Validar que se proporcionen todos los campos requeridos
+  // Validar que se proporcionen todos los campos requeridos
   if (!cruceroId || !cantidadBilletes || !datosTarjeta) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
@@ -376,15 +419,32 @@ app.post('/comprarBilletes', async (req, res) => {
       return res.status(400).json({ mensaje: 'No hay suficientes billetes disponibles' });
     }
 
-    //^ Realizar el proceso de compra de billetes
+    // Realizar el proceso de compra de billetes
     crucero.aforo -= cantidadBilletes;
     await crucero.$query().patch();
 
-    //^ Guardar la información de la compra en la base de datos
+    // Crear la estructura de datos deseada
+    const misDatos = {
+      cruceroId: parseInt(cruceroId),
+      cantidadBilletes: parseInt(cantidadBilletes),
+      datosTarjeta: {
+        cardNumber: datosTarjeta.cardNumber,
+        cvv: datosTarjeta.cvv,
+        expiresOn: datosTarjeta.expiresOn
+      }
+    };
+
+    // Convertir a JSON y luego a base64
+    const miString = JSON.stringify(misDatos);
+    const secure = Buffer.from(miString).toString('base64');
+
+    console.log(secure);
+
+    // Guardar la información de la compra en la base de datos
     const compra = {
       cruceroId,
       cantidadBilletes,
-      datosTarjeta
+      datosTarjeta: datosTarjetaCifrados,
     };
 
     await Compra.query().insert(compra);
@@ -398,11 +458,15 @@ app.post('/comprarBilletes', async (req, res) => {
   }
 });
 
+//! ENDPOINT Mostrar informacion de compra ===============================================
+//const qr = require('qrcode');
+//const Compra = require('./models/compra.model.js');
 
 
 
 
 // ! BORRADOR =======================================================================================
+const express = require('express');
 const crypto = require('crypto');
 
 //const app = express();
@@ -413,47 +477,44 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
   modulusLength: 2048,
 });
 
-// ! FUNCIÓN para cifrar datos
-app.post('/encrypt', (req, res) => {
   try {
-    const data = req.body.data; // Datos a cifrar
+    //^ Obtener la información de la compra desde la base de datos
+    const comprab = await Compra.query().findById(compraId);
 
-    const buffer = Buffer.from(data);
-    const encryptedData = crypto.publicEncrypt(
-      {
-        key: publicKey,
-        padding: crypto.constants.RSA_PKCS1_PADDING,
-      },
-      buffer
-    );
+    if (!comprab) {
+      return res.status(404).json({ mensaje: 'Compra no encontrada' });
+    }
 
-    const encryptedBase64 = encryptedData.toString('base64');
-    res.json({ encryptedData: encryptedBase64 });
+    // Obtener el nombre del crucero, la cantidad de billetes y los últimos 4 dígitos de la tarjeta
+    const crucero = await Crucero.query().findById(comprab.cruceroId);
+
+    if (!crucero) {
+      return res.status(404).json({ mensaje: 'Crucero no encontrado' });
+    }
+
+    const nombreCrucero = crucero.nombre;
+    const cantidadBilletes = comprab.cantidadBilletes;
+    const numeroTarjeta = comprab.datosTarjeta.cardNumber;
+    const ultimosDigitosTarjeta = numeroTarjeta.slice(-4);
+    const asteriscosTarjeta = '*'.repeat(numeroTarjeta.length - 4);
+
+    //^ Generar el código QR con la información de la comprab
+    /*const qrData = {
+      nombreCrucero,
+      cantidadBilletes,
+      numeroTarjeta: `${asteriscosTarjeta}${ultimosDigitosTarjeta}`,
+      compraId
+    };*/
+
+    //const qrCode = await qr.toDataURL(JSON.stringify(qrData));
+
+    // Devolver la información de la comprab y el código QR al cliente
+  res.status(200).json({ nombreCrucero, cantidadBilletes, numeroTarjeta: `${asteriscosTarjeta}${ultimosDigitosTarjeta}`/*, qrCode*/ });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cifrar los datos' });
+    console.log(error);
+    res.status(500).json({ mensaje: 'Error al obtener la información de la comprab' });
   }
 });
-
-// ! FUNCIÓN para descifrar datos
-  app.post('/decrypt', (req, res) => {
-    try {
-      const encryptedData = req.body.encryptedData; // Datos cifrados
-
-      const buffer = Buffer.from(encryptedData, 'base64');
-      const decryptedData = crypto.privateDecrypt(
-        {
-          key: privateKey,
-          padding: crypto.constants.RSA_PKCS1_PADDING,
-        },
-        buffer
-      );
-
-      const decryptedString = decryptedData.toString();
-      res.json({ decryptedData: decryptedString });
-    } catch (error) {
-      res.status(500).json({ error: 'Error al descifrar los datos' });
-    }
-  });
 
 
 

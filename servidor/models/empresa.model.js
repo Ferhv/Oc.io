@@ -50,8 +50,6 @@ export default class Empresa extends Model {
     return bcrypt.compare(String(unsecurePassword), String(this.password), callback)
 
   }
-
-
 }
 
 

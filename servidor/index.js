@@ -414,7 +414,7 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
   modulusLength: 2048,
 });
 
-// ! Endpoint para cifrar datos
+// ! FUNCIÓN para cifrar datos
 app.post('/encrypt', (req, res) => {
   try {
     const data = req.body.data; // Datos a cifrar
@@ -435,7 +435,7 @@ app.post('/encrypt', (req, res) => {
   }
 });
 
-// ! Endpoint para descifrar datos
+// ! FUNCIÓN para descifrar datos
   app.post('/decrypt', (req, res) => {
     try {
       const encryptedData = req.body.encryptedData; // Datos cifrados

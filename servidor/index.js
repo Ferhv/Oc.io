@@ -1,13 +1,14 @@
 import  Empresa  from './models/empresa.model.js';
 import  Crucero  from './models/crucero.model.js';
 import  Cliente  from './models/cliente.model.js';
+import  Compra  from './models/compra.model.js';
 import Administrador from './models/administrador.model.js';
 
 import Knex from 'knex';
 import express from 'express';
 import cors from 'cors';
 import moment from 'moment';
-import { esTelefonoValido, esFechaValida, esValidoDNI, esValidoEmail, esValidoCIF } from './lib/validators.js';
+import { esTelefonoValido, esFechaValida, esValidoDNI, esValidoEmail, esValidoCIF, esValidoCVV, esValidoCard, esValidoExpiracion } from './lib/validators.js';
 import { development } from './knexfile.js';
 import passport from 'passport';
 import session from 'express-session';
@@ -42,6 +43,7 @@ app.use(session({
 app.use(passport.initialize()); // passport.initialize() inicializa Passport
 app.use(passport.session()); // passport.session() indica a Passport que usará sesiones
 strategyInit(passport);
+
 
 // TODO Inicialización del passport EMPRESA ================================================================================================
 app.use(session({
@@ -148,10 +150,10 @@ app.post('/borrarCliente', async (req, res) => {
 
 // TODO Endpoint: POST /REGISTRAR EMPRESA --> Ok  ============================================================================================
 app.post('/registrarEmpresa', async (req, res) => {
-  const { nombre, email, password, cif, domicilio_social, telefono, responsable, euros} = req.body;
+  const { nombre, email, password, cif, puerto, telefono, responsable, euros} = req.body;
 
   //^ Validar que se proporcionen todos los campos requeridos 
-  if (!nombre || !email || !password || !cif || !domicilio_social || !telefono || !responsable || !euros) {
+  if (!nombre || !email || !password || !cif || !puerto  || !telefono || !responsable || !euros) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
@@ -208,7 +210,7 @@ try {
 });
 
 // ! BORRADOR Endpoint: PUT ==================================================================================================================
-app.put('/eventos/:idCrucero', async (req, res) => {
+app.put('/cruceros/:idCrucero', async (req, res) => {
   const idCrucero = req.params.idCrucero;
   const nuevosDatosCrucero = req.body;
   
@@ -271,17 +273,17 @@ app.get('/pantallaPrincipal', async (req, res) => {
 
 // TODO Endpoint: POST /REGISTRAR CRUCERO --> Ok  ============================================================================================
 app.post('/registrarCrucero', async (req, res) => {
-  const { nombre, puerto_origen, ubicacion, aforo, descripcion, fecha, hora, precio, empresa_email } = req.body;
+  const { nombre, puerto, ubicacion, aforo, descripcion, fecha, hora, precio, empresa_email } = req.body;
 
   //^ Validar que se proporcionen todos los campos requeridos 
-  if (!nombre || !puerto_origen || !ubicacion || !aforo || !descripcion || !fecha || !hora || !precio || !empresa_email ) {
+  if (!nombre || !puerto || !ubicacion || !aforo || !descripcion || !fecha || !hora || !precio || !empresa_email ) {
     return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
   }
 
   //^ Guardar los datos del crucero en la base de datos 
-  Concierto.query().insert({
+  Crucero.query().insert({
     nombre,
-    puerto_origen,
+    puerto,
     ubicacion,
     aforo: Number(aforo),
     precio: Number(precio),
@@ -301,7 +303,7 @@ app.post('/borrarCrucero', async (req, res) => {
 
 
 // TODO  Endpoint: GET / LISTADO CRUCEROS QUE NO HAYAN PASADO DE FECHA =====================================================================
-app.get('/eventosDisponibles', async (req, res) => {
+app.get('/crucerosDisponibles', async (req, res) => {
   try {
     // Obtener los eventos disponibles (que no hayan pasado)
     const eventos = await Crucero.query().where('fecha', '>', new Date());
@@ -341,39 +343,121 @@ app.get('/eventosDisponibles', async (req, res) => {
 
 
 // ! BORRADOR =======================================================================================
-app.post('/comprarEntradas', async (req, res) => {
-  const { idEvento, cantidadEntradas, numeroTarjeta, cvv, fechaCaducidad } = req.body;
+//! Endpoint para comprar billetes
+app.post('/comprarBilletes', async (req, res) => {
+  const { cruceroId, cantidadBilletes, datosTarjeta } = req.body;
+
+  //^ Validar que se proporcionen todos los campos requeridos
+  if (!cruceroId || !cantidadBilletes || !datosTarjeta) {
+    return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+  }
 
   try {
-    // Obtener los detalles del evento por su ID
-    const evento = await Concierto.query().findById(idEvento);
-
-    if (!evento) {
-      return res.status(404).json({ error: 'Evento no encontrado' });
+    //^ Realizar verificaciones para el número de tarjeta, CVV y fecha de expiración
+    if (!esValidoCard(datosTarjeta.cardNumber)) {
+      return res.status(400).json({ mensaje: 'Número de tarjeta inválido' });
     }
 
-    // Realizar la validación y proceso de pago con la pasarela de pago
-    const transaccionValida = await pasarelaPago.validarTransaccion(numeroTarjeta, cvv, fechaCaducidad);
-
-    if (!transaccionValida) {
-      return res.status(400).json({ error: 'La transacción de pago no es válida' });
+    if (!esValidoCVV(datosTarjeta.cvv)) {
+      return res.status(400).json({ mensaje: 'CVV inválido' });
     }
 
+    if (!esValidoExpiracion(datosTarjeta.expiresOn)) {
+      return res.status(400).json({ mensaje: 'Fecha de expiración inválida' });
+    }
 
-      Entradas.query().insert({
-        evento_id: idEvento,
-        cantidad_entradas: cantidadEntradas,
-        fecha_compra: new Date(),
-        monto_pagado: evento.precio * cantidadEntradas,
-        tarjeta_ultimos_digitos: numeroTarjeta.slice(-4),
-      }).then(results => res.status(200).json({status: "Ok"})).catch(err => res.status(500).json({error: err}));
+    //^ Verificar la disponibilidad de billetes para el crucero
+    const crucero = await Crucero.query().findById(cruceroId);
+    if (!crucero) {
+      return res.status(400).json({ mensaje: 'El crucero no existe' });
+    }
 
+    if (crucero.aforo < cantidadBilletes) {
+      return res.status(400).json({ mensaje: 'No hay suficientes billetes disponibles' });
+    }
 
-    res.status(200).json({ mensaje: 'Compra de entradas realizada exitosamente' });
+    //^ Realizar el proceso de compra de billetes
+    crucero.aforo -= cantidadBilletes;
+    await crucero.$query().patch();
+
+    //^ Guardar la información de la compra en la base de datos
+    const compra = {
+      cruceroId,
+      cantidadBilletes,
+      datosTarjeta
+    };
+
+    await Compra.query().insert(compra);
+
+    // Enviar una respuesta exitosa al cliente
+    res.status(200).json({ mensaje: 'Billetes comprados exitosamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al procesar la compra de entradas' });
+    // Manejar cualquier error que ocurra durante el proceso de compra
+    console.log(error);
+    res.status(500).json({ mensaje: 'Error al realizar la compra de los billetes' });
   }
 });
+
+
+
+
+
+// ! BORRADOR =======================================================================================
+const express = require('express');
+const crypto = require('crypto');
+
+//const app = express();
+app.use(express.json());
+
+// Generar un par de claves pública y privada
+const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+});
+
+// ! Endpoint para cifrar datos
+app.post('/encrypt', (req, res) => {
+  try {
+    const data = req.body.data; // Datos a cifrar
+
+    const buffer = Buffer.from(data);
+    const encryptedData = crypto.publicEncrypt(
+      {
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      buffer
+    );
+
+    const encryptedBase64 = encryptedData.toString('base64');
+    res.json({ encryptedData: encryptedBase64 });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al cifrar los datos' });
+  }
+});
+
+// ! Endpoint para descifrar datos
+  app.post('/decrypt', (req, res) => {
+    try {
+      const encryptedData = req.body.encryptedData; // Datos cifrados
+
+      const buffer = Buffer.from(encryptedData, 'base64');
+      const decryptedData = crypto.privateDecrypt(
+        {
+          key: privateKey,
+          padding: crypto.constants.RSA_PKCS1_PADDING,
+        },
+        buffer
+      );
+
+      const decryptedString = decryptedData.toString();
+      res.json({ decryptedData: decryptedString });
+    } catch (error) {
+      res.status(500).json({ error: 'Error al descifrar los datos' });
+    }
+  });
+
+
+
 
 // * ========================================================================================================================================= 
 // * =====================================================================  ADMINISTRADOR ====================================================  

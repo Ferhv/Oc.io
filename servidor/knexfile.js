@@ -6,7 +6,7 @@
 export const development = {
   client: "pg",
   connection: {
-    database: "oc.io_2023",
+    database: "7Mares",
     user: "postgres",
     password: "root",
   },

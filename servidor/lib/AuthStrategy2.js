@@ -24,20 +24,6 @@ export const strategyInit2 = passport => {
 ));
 
 
-
-
-
-// Serializar usuarios
-passport.serializeUser((user, done) => {
-  done(null, user.email)
-})
-
-// Deserializar usuarios
-passport.deserializeUser((email, done) => {
-  Empresa.query().findById(email).then((user) => {
-    done(null, user)
-  })
-})
 }
 
 export default strategyInit2;

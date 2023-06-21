@@ -44,27 +44,7 @@ app.use(session({
 app.use(passport.initialize()); // passport.initialize() inicializa Passport
 app.use(passport.session()); // passport.session() indica a Passport que usará sesiones
 strategyInit(passport);
-
-
-// TODO Inicialización del passport EMPRESA ================================================================================================
-app.use(session({
-  secret: 'cines-session-cookie-key', 
-  name: 'SessionCookie.SID', 
-  saveUninitialized: false,
-}));
-app.use(passport.initialize()); 
-app.use(passport.session()); 
 strategyInit2(passport);
-
-
-// TODO Inicialización del passport ADMIN ================================================================================================
-app.use(session({
-  secret: 'cines-session-cookie-key', 
-  name: 'SessionCookie.SID', 
-  saveUninitialized: false,
-}));
-app.use(passport.initialize()); 
-app.use(passport.session()); 
 strategyInit3(passport);
 
 
@@ -245,6 +225,7 @@ debugger;
 
 
 // ! BORRADOR ===============================================================================
+// !!!!! CUIDAO
 app.get('/pantallaPrincipal', async (req, res) => {
   const idEmpresa = req.params.id;
   try {
@@ -307,7 +288,7 @@ app.post('/borrarCrucero', async (req, res) => {
 app.get('/crucerosDisponibles', async (req, res) => {
   try {
     // Obtener los eventos disponibles (que no hayan pasado)
-    const eventos = await Crucero.query().where('fecha', '>', new Date());
+    const eventos = await Crucero.query();
 
     res.status(200).json(eventos);
   } catch (error) {
@@ -438,6 +419,7 @@ app.post('/comprarBilletes', async (req, res) => {
     const miString = JSON.stringify(misDatos);
     const secure = Buffer.from(miString).toString('base64');
 
+    //const secureReverse = JSON.parse(Buffer.from(secure, 'base64'));
     console.log(secure);
 
     // Guardar la información de la compra en la base de datos
@@ -466,12 +448,9 @@ app.post('/comprarBilletes', async (req, res) => {
 
 
 // ! BORRADOR =======================================================================================
-const crypto = require('crypto');
+app.post('/test', async (req, res) => {
 
-//const app = express();
-app.use(express.json());
-
-// Generar un par de claves pública y privada
+// Generar un par de claves pública y privada --> Fer
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
   modulusLength: 2048,
 });
@@ -514,7 +493,6 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     res.status(500).json({ mensaje: 'Error al obtener la información de la comprab' });
   }
 });
-
 
 
 

@@ -1,6 +1,8 @@
 import passport from 'passport'
 import {Strategy as LocalStrategy} from 'passport-local' // Importamos la estrategia passport-local con el nombre "LocalStrategy"
 import Cliente from '../models/cliente.model.js'
+import Empresa from '../models/empresa.model.js';
+import Administrador from '../models/administrador.model.js';
 
 // Passport.use() aplica el middleware pasado por parámetros a la instancia de Passport
 // (algo parecido a lo que hacemos con Express.use() para definir middlewares de Express)
@@ -29,14 +31,35 @@ export const strategyInit = passport => {
 
 // Serializar usuarios
 passport.serializeUser((user, done) => {
-  done(null, user.email)
+  done(null, {
+    email: user.email,
+    role: user instanceof Cliente 
+    ? 'cliente'
+    : user instanceof Empresa
+      ? 'empresa'
+      : 'admin'
+  })
 })
 
 // Deserializar usuarios
-passport.deserializeUser((email, done) => {
-  Cliente.query().findById(email).then((user) => {
-    done(null, user)
-  })
+passport.deserializeUser((user, done) => {
+  if (user.role === 'cliente') {
+    Cliente.query().findById(user.email).then((found) => {
+      done(null, found)
+    })
+  }
+  else if (user.role === 'empresa') {
+    Empresa.query().findById(user.email).then((found) => {
+      done(null, found)
+    })
+  }
+  else if (user.role === 'admin') {
+    Administrador.query().findById(user.email).then((found) => {
+      done(null, found)
+    })
+  } else {
+    done(null, null);
+  }
 })
 }
 

@@ -24,19 +24,6 @@ export const strategyInit3 = passport => {
       })
   }
 ));
-
-
-// Serializar usuarios
-passport.serializeUser((user, done) => {
-  done(null, user.email)
-})
-
-// Deserializar usuarios
-passport.deserializeUser((email, done) => {
-    Administrador.query().findById(email).then((user) => {
-    done(null, user)
-  })
-})
 }
 
 export default strategyInit3;

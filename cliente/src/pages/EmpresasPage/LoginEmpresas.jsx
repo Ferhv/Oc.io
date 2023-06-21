@@ -10,7 +10,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
 
-export const LoginDialog = () => {
+export const LoginEmpresa = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +36,7 @@ export const LoginDialog = () => {
 
     if (!!email && !!password) {
         axios({
-            url: 'http://localhost:8080/login',
+            url: 'http://localhost:8080/loginEmpresa',
             method: 'POST',
             withCredentials: true,
             data: {
@@ -88,4 +88,4 @@ export const LoginDialog = () => {
       </Dialog>
     </div>
   );
-}
+} 

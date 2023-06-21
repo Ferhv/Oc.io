@@ -40,7 +40,6 @@ return <TableContainer component={Paper}>
           {crucero.id}
         </TableCell>
         <TableCell align="right">{crucero.nombre}</TableCell>
-
         <TableCell align="right">{crucero.puerto}</TableCell>
         <TableCell align="right">{crucero.precio}</TableCell>
       </TableRow>

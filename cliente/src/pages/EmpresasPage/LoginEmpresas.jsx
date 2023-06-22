@@ -46,7 +46,7 @@ export const LoginEmpresa = () => {
             }
         }).then(response => {
             if (!!response.data) {
-              navigate('/cruceros');
+              navigate('/crucerosPorEmpresa');
               navigate(0); // <-- Forzamos que se actualice la página, actualizándose la cabecera
             }
         })
@@ -61,25 +61,25 @@ export const LoginEmpresa = () => {
       <Dialog open={open} onClose={handleClose}>/**Cerrar ventana */
         <DialogTitle>Iniciar sesión</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            onChange={e => setEmail(e.target.value)}
-            margin="dense"
-            id="email"
-            label="Usuario"
-            fullWidth
-            variant="standard"
-          />
-                    <TextField
-            autoFocus
-            onChange={e => setPassword(e.target.value)}
-            margin="dense"
-            id="password"
-            label="Contraseña"
-            type="password"
-            fullWidth
-            variant="standard"
-          />
+            <TextField
+                autoFocus
+                onChange={e => setEmail(e.target.value)}
+                margin="dense"
+                id="email"
+                label="Usuario"
+                fullWidth
+                variant="standard"
+            />
+            <TextField
+                autoFocus
+                onChange={e => setPassword(e.target.value)}
+                margin="dense"
+                id="password"
+                label="Contraseña"
+                type="password"
+                fullWidth
+                variant="standard"
+            />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>

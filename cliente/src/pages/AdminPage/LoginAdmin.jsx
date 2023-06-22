@@ -10,7 +10,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
 
-export const LoginEmpresa = () => {
+export const LoginCliente = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +36,7 @@ export const LoginEmpresa = () => {
 
     if (!!email && !!password) {
         axios({
-            url: 'http://localhost:8080/loginEmpresa',
+            url: 'http://localhost:8080/loginAdmin',
             method: 'POST',
             withCredentials: true,
             data: {
@@ -45,7 +45,7 @@ export const LoginEmpresa = () => {
             }
         }).then(response => {
             if (!!response.data) {
-              navigate('/cruceros');
+              navigate('/crucerosDisponibles');
               navigate(0); // <-- Forzamos que se actualice la página, actualizándose la cabecera
             }
         })

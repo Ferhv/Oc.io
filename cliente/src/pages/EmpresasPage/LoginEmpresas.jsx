@@ -19,7 +19,7 @@ export const LoginEmpresa = () => {
   
   const navigate = useNavigate();
   /**Inicio de sesion */
-  const handleClickOpen = () => {
+  const handleClickOpen = () => { 
     setOpen(true);
   };
 

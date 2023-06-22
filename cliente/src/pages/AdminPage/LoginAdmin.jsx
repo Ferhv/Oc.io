@@ -113,7 +113,7 @@ export const LoginAdmin = () => {
             }
         }).then(response => { 
             if (!!response.data) {
-              navigate('/VistaEmpresas');
+              navigate('/crucerosDisponibles');
               navigate(0); // <-- Forzamos que se actualice la página, actualizándose la cabecera
             }
         })

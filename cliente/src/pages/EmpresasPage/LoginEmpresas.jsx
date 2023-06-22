@@ -18,6 +18,7 @@ export const LoginEmpresa = () => {
   const [passwordError, setPasswordError] = useState(false);
   
   const navigate = useNavigate();
+  /**Inicio de sesion */
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -54,11 +55,10 @@ export const LoginEmpresa = () => {
 
   return (
     <div>
-      <h1>LOGIN</h1>
       <Button onClick={handleClickOpen}>
         Iniciar sesión
       </Button>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose}>/**Cerrar ventana */
         <DialogTitle>Iniciar sesión</DialogTitle>
         <DialogContent>
           <TextField
@@ -89,3 +89,5 @@ export const LoginEmpresa = () => {
     </div>
   );
 } 
+
+export default LoginEmpresa;

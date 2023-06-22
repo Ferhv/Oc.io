@@ -45,7 +45,7 @@ export const LoginCliente = () => {
             }
         }).then(response => {
             if (!!response.data) {
-              navigate('/crucerosDisponibles');
+              navigate('/empresasLista');
               navigate(0); // <-- Forzamos que se actualice la página, actualizándose la cabecera
             }
         })

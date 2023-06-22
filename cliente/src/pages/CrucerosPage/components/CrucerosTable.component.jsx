@@ -23,11 +23,13 @@ export const CrucerosTable = () => {
 return <TableContainer component={Paper}>
 <Table sx={{ minWidth: 650 }} aria-label="simple table">
   <TableHead>
+  <h3>Listado de Cruceros</h3>
     <TableRow>
-      <TableCell>ID</TableCell>
+      <TableCell>Id</TableCell>
       <TableCell align="right">Nombre</TableCell>
       <TableCell align="right">Puerto</TableCell>
-      <TableCell align="right">Precio)</TableCell>
+      <TableCell align="right">Precio</TableCell>
+      <TableCell align="right">Editar</TableCell> 
     </TableRow>
   </TableHead>
   <TableBody>
@@ -41,11 +43,12 @@ return <TableContainer component={Paper}>
         </TableCell>
         <TableCell align="right">{crucero.nombre}</TableCell>
         <TableCell align="right">{crucero.puerto}</TableCell>
-        <TableCell align="right">{crucero.precio}</TableCell>
+        <TableCell align="right">{crucero.precio}€</TableCell>
       </TableRow>
     ))}
   </TableBody>
 </Table>
 </TableContainer>
 }
+
 export default CrucerosTable;

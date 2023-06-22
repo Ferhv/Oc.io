@@ -1,3 +1,70 @@
+import React, { useState } from 'react';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import axios from 'axios';
+
+const LoginAdmin = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post('/loginAdmin', {
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        // Login exitoso, redireccionar o realizar alguna acción adicional
+        console.log('Inicio de sesión exitoso');
+      } else {
+        // Error de inicio de sesión
+        setError('Error en el inicio de sesión');
+      }
+    } catch (error) {
+      // Error en la solicitud
+      setError('Error en la solicitud');
+    }
+  };
+
+  return (
+    <div>
+      <h1>Iniciar sesión como administrador</h1>
+      <form onSubmit={handleLogin}>
+        <div>
+          <TextField
+            type="email"
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <TextField
+            type="password"
+            label="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit" variant="contained" color="primary">
+          Iniciar sesión
+        </Button>
+      </form>
+      {error && <p>{error}</p>}
+    </div>
+  );
+};
+
+export default LoginAdmin;
+
+
+/*
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -10,7 +77,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
 
-export const LoginCliente = () => {
+
+export const LoginAdmin = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,9 +111,9 @@ export const LoginCliente = () => {
                 email: email,
                 password: password,
             }
-        }).then(response => {
+        }).then(response => { 
             if (!!response.data) {
-              navigate('/crucerosDisponibles');
+              navigate('/VistaEmpresas');
               navigate(0); // <-- Forzamos que se actualice la página, actualizándose la cabecera
             }
         })
@@ -88,4 +156,4 @@ export const LoginCliente = () => {
       </Dialog>
     </div>
   );
-} 
+} */

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import {Link} from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 const RegistroEmpresas = () => {
   const [nombre, setNombre] = useState('');
@@ -14,7 +16,7 @@ const RegistroEmpresas = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Realizar la solicitud de registro de la empresa
+    // Realizar la solicitud de registro de la empresaa
     axios
       .post('http://localhost:8080/registrarEmpresa', {
         nombre,
@@ -130,7 +132,10 @@ const RegistroEmpresas = () => {
       />
     </div>
 
-    <button type="submit">Registrar</button>
+    <Button>
+      <Link to="/RegistroEmpresas">Registrar</Link>
+    </Button>
+    
   </form>
 </div>
 

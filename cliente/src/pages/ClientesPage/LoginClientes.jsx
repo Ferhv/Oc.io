@@ -10,6 +10,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
 
+
 export const LoginCliente = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -54,6 +55,27 @@ export const LoginCliente = () => {
 
   return (
     <div>
+            <h1>LOGIN</h1>
+            <form onSubmit={ handleSubmit }>
+                <label for="mail">Email</label>
+                <input type="email" name="mail" value={mail} onChange={e => setMail(e.target.value)} required />
+                <label for="password">Password</label>
+                <input type="password" for="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                <br/> 
+                <br/>
+                <input type="submit" value="Login" />
+                <br/><br/>
+                <Button>
+                    <Link to="/crucerosDisponibles"> Iniciar</Link>
+                </Button>
+                <a href="/RegistroClientes">Registrarse</a>
+            </form>
+            <div id="errorLabel">{statusMsg}</div>
+    </div>
+  );
+} 
+
+/**<div>
       <h1>LOGIN</h1>
       <Button onClick={handleClickOpen}>
         Iniciar sesión
@@ -86,6 +108,4 @@ export const LoginCliente = () => {
           <Button onClick={performLogin}>Iniciar sesión</Button>
         </DialogActions>
       </Dialog>
-    </div>
-  );
-} 
+    </div> */

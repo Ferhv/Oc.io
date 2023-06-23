@@ -1,4 +1,124 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const LoginForm = () => {
+  const navigate = useNavigate();
+
+  const [clientFormData, setClientFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const [companyFormData, setCompanyFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const [adminFormData, setAdminFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleClientChange = (e) => {
+    setClientFormData({ ...clientFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleCompanyChange = (e) => {
+    setCompanyFormData({ ...companyFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleAdminChange = (e) => {
+    setAdminFormData({ ...adminFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = async (endpoint, formData) => {
+    try {
+      const response = await axios.post(endpoint, formData);
+      if (response.status === 200) {
+        // Acceso exitoso, maneja la respuesta según tus necesidades
+        console.log(response.data);
+        if (endpoint === '/loginAdmin') {
+          // Redirigir a la página VistaEmpresas en caso de iniciar sesión como admin
+          navigate('/VistaEmpresas');
+        }
+      } else {
+        // Acceso denegado
+        console.log('Error en la autenticación');
+      }
+    } catch (error) {
+      console.error(error);
+      // M
+    }
+  };
+
+  const handleClientLogin = (e) => {
+    e.preventDefault();
+    handleLogin('/login', clientFormData);
+  };
+
+  const handleCompanyLogin = (e) => {
+    e.preventDefault();
+    handleLogin('/loginEmpresa', companyFormData);
+  };
+
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    handleLogin('/loginAdmin', adminFormData);
+  };
+
+  return (
+    <div>
+      <h2>Cliente</h2>
+      <form onSubmit={handleClientLogin}>
+        <label>
+          Email:
+          <input type="email" name="email" value={clientFormData.email} onChange={handleClientChange} />
+        </label>
+        <label>
+          Contraseña:
+          <input type="password" name="password" value={clientFormData.password} onChange={handleClientChange} />
+        </label>
+        <button type="submit">Iniciar sesión</button>
+      </form>
+
+      <h2>Empresa</h2>
+      <form onSubmit={handleCompanyLogin}>
+        <label>
+          Email:
+          <input type="email" name="email" value={companyFormData.email} onChange={handleCompanyChange} />
+        </label>
+        <label>
+          Contraseña:
+          <input type="password" name="password" value={companyFormData.password} onChange={handleCompanyChange} />
+        </label>
+        <button type="submit">Iniciar sesión</button>
+      </form>
+
+      <h2>Admin</h2>
+      <form onSubmit={handleAdminLogin}>
+        <label>
+          Email:
+          <input type="email" name="email" value={adminFormData.email} onChange={handleAdminChange} />
+        </label>
+        <label>
+          Contraseña:
+          <input type="password" name="password" value={adminFormData.password} onChange={handleAdminChange} />
+        </label>
+        <button type="submit">Iniciar sesión</button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginForm;
+
+
+
+
+
+
+/*import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
@@ -61,7 +181,7 @@ const LoginAdmin = () => {
   );
 };
 
-export default LoginAdmin;
+export default LoginAdmin;*/
 
 
 /*

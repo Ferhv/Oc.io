@@ -1,5 +1,105 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+
+const InsertForm = () => {
+  const [formData, setFormData] = useState({
+    nombre: '',
+    email: '',
+    password: '',
+    cif: '',
+    puerto: '',
+    telefono: '',
+    responsable: '',
+    euros: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('registrarEmpresa', formData);
+      console.log(response.data); // Maneja la respuesta del servidor según tus necesidades
+
+     
+
+      // Reinicia el formulario
+      setFormData({
+        nombre: '',
+        email: '',
+        password: '',
+        cif: '',
+        puerto: '',
+        telefono: '',
+        responsable: '',
+        euros: ''
+      });
+    } catch (error) {
+      if (error.response) {
+        // El servidor ha respondido con un código de estado fuera del rango 2xx
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        // La solicitud fue realizada pero no se recibió una respuesta
+        console.log(error.request);
+      } else {
+        // Ocurrió un error al configurar la solicitud
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Nombre:
+        <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} />
+      </label>
+      <label>
+        Email:
+        <input type="email" name="email" value={formData.email} onChange={handleChange} />
+      </label>
+      <label>
+        Contraseña:
+        <input type="password" name="password" value={formData.password} onChange={handleChange} />
+      </label>
+      <label>
+        CIF:
+        <input type="text" name="cif" value={formData.cif} onChange={handleChange} />
+      </label>
+      <label>
+        Puerto:
+        <input type="text" name="puerto" value={formData.puerto} onChange={handleChange} />
+      </label>
+      <label>
+        Teléfono:
+        <input type="text" name="telefono" value={formData.telefono} onChange={handleChange} />
+      </label>
+      <label>
+        Responsable:
+        <input type="text" name="responsable" value={formData.responsable} onChange={handleChange} />
+      </label>
+      <label>
+        Euros:
+        <input type="text" name="euros" value={formData.euros} onChange={handleChange} />
+      </label>
+      <button type="submit">Enviar</button>
+    </form>
+  );
+};
+
+export default InsertForm;
+
+
+
+
+
+/*import React, { useState } from 'react';
+import axios from 'axios';
 import {Link} from 'react-router-dom';
 import Button from '@mui/material/Button';
 
@@ -143,3 +243,4 @@ const RegistroEmpresas = () => {
 };
 
 export default RegistroEmpresas;
+*/

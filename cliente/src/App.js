@@ -12,7 +12,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" index element={<LoginAdmin/>}/>
+        <Route path="/" index element={<LoginEmpresas/>}/>
       </Routes>  
     </Router>
   )
